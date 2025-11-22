@@ -6,3 +6,5 @@ from django.shortcuts import render
 
 def home_view(request):
     return render(request,'JobFinder_app/home.html')
+
+# comment
