@@ -5,6 +5,11 @@
     <title>Document</title>
 </head>
 <body>
-    
+    <h1>Job Seeker Experience Form</h1>
+    <form method="POST">
+        {% csrf_token %}
+        {{form}}
+        <input type="submit">
+    </form>
 </body>
 </html>
