@@ -1,5 +1,6 @@
 from django.shortcuts import render
-from .forms import SeekerForm
+from . forms import SeekerForm
+#from . models import ExperienceModel
 
 
 
@@ -18,3 +19,9 @@ def seeker_view(request):
     else:
         form = SeekerForm()
         return render(request,'JobFinder_app/seekerex.html',context={'form': form})
+    
+#def report_create_experience(request):
+#    if request.method == 'POST':
+#        form = ExperienceModel(request.POST)
+#        if form.is_valid():
+##            form.instance.user = request.user
