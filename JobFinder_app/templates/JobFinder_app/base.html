@@ -1,10 +1,106 @@
+<!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device.width, initial-scale=1">
+        <title>Seat at the Table</title>
+
+        <style>
+            p{
+                font-size: 20pt;
+                
+            }
+            body{
+                background-color: black;
+                color: white;
+            }
+            h1{
+                font-family: Verdana, Geneva, Tahoma, sans-serif;
+                font-size: 32pt;
+                font-style: none;
+                font-weight: none;
+            }
+            h3{
+                font-family: Verdana, Geneva, Tahoma, sans-serif;
+                font-size: 26pt;
+                font-style: none;
+                font-weight: none;
+            }
+            button.menuButton{
+                align-self: center;
+                height: 160;
+                width: 80%;
+                background-color: slategrey;
+                border: none;
+                color: white;
+                padding: 15px 32px;
+                text-align: center;
+                text-decoration: none;
+                font-weight: bold;
+                font-style: none;
+                display: inline-block;
+                font-size: 24px; 
+            }
+            div.homeBody{
+                text-align: center;
+                align-content: center;
+            }
+            .myfieldclass{
+                color:red;
+            }
+
+            button.homer{
+                align-content: center;
+                height: 160;
+                width: 20%;
+                background-color: slategrey;
+                border: none;
+                color: white;
+                padding: 15px 32px;
+                text-align: center;
+                text-decoration: none;
+                font-weight: bold;
+                font-style: none;
+                display: inline-block;
+                font-size: 2vw; 
+            }
+            div.stpbody{
+                text-align: start;
+                align-content: start;
+                font-family: Verdana, Geneva, Tahoma, sans-serif;
+                font-size: 20pt;
+                
+                font-style: none;
+                font-weight: none;
+            }
+            
+            
+
+        </style>
+
+    </head>
+
+    <body>
+
+
+
+<!-- Content Container -->
+<div class="container">
+    <div class="homeBody">
     
-</body>
+    <!-- <form action="/Report/" type="POST">
+        <button class ="homer" type="submit" value="Home Button">Incident Reporting</button>
+        </form> -->
+    </div>
+            
+                
+            
+    {% block content %}
+        
+
+    {% endblock %}
+
+</div>
+
+    </body>
 </html>
