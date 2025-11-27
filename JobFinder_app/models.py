@@ -1,19 +1,18 @@
 from django.db import models
 from django.contrib.auth.models import User
-##from sympy import ordered
 
 
-#class Years(models.Model):
-#    experience = models.CharField(max_length=100)
 
-#    def __str__(self):
-#        return self.experience
-#class ExperienceModel(models.Model):
-#    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-#    python = models.ForeignKey(Years, on_delete=models.SET_NULL, null=True)
 
+# class NameModel(models.Model):
+#     first_name = models.CharField(max_length=30)
+#     last_name = models.CharField(max_length=30)
+
+class SeekerModel(models.Model):
+    first_name = models.CharField(max_length=30, null=True)
+    last_name = models.CharField(max_length=30, null=True)
+    total_years_experience = models.IntegerField()
     
-        
+    
 
-#    def __str__(self):
-#        return f'{self.python}'
+
