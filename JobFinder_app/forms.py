@@ -49,7 +49,7 @@ from .models import SeekerModel
 class SeekerForm(ModelForm):
     class Meta:
         model = SeekerModel
-        fields = ['first_name']
+        exclude = []
 
 
     
