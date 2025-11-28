@@ -25,6 +25,9 @@ def seeker_view(request):
 
 def thanks_view(request):
     return render(request,'JobFinder_app/thanks.html')
+
+def employer_view(request):
+    return render(request, 'JobFinder_app/employerhome.html')
     
 #def report_create_experience(request):
 #    if request.method == 'POST':
