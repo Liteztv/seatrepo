@@ -4,9 +4,8 @@ from django.contrib.auth.models import User
 
 
 
-# class NameModel(models.Model):
-#     first_name = models.CharField(max_length=30)
-#     last_name = models.CharField(max_length=30)
+class User(models.Model):
+    pass
 
 class SeekerModelOne(models.Model):
     first_name = models.CharField(max_length=30, null=True)

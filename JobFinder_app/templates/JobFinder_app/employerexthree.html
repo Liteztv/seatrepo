@@ -1,0 +1,14 @@
+{% extends 'JobFinder_app/base.html' %}
+{% block content %}
+
+<h1>Job Seeker Experience Form</h1>
+<form method="POST">
+    {% csrf_token %}
+    {{form}}
+</br></br>
+    <input type="submit">
+</form>
+
+
+
+{% endblock %}

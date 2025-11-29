@@ -36,7 +36,7 @@ class SeekerFormThree(ModelForm):
 
 
 
-class EmployerFormTwo(ModelForm):
+class EmployerFormOne(ModelForm):
 
     class Meta:
         model = EmployerModelOne
