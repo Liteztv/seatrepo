@@ -1,5 +1,9 @@
 from django.contrib import admin
-from .models import SeekerModel
+from .models import SeekerModelOne, EmployerModelOne,SeekerModelTwo,SeekerModelThree, EmployerModelTwo, EmployerModelThree
 
-admin.site.register(SeekerModel)
-
+admin.site.register(SeekerModelOne)
+admin.site.register(EmployerModelOne)
+admin.site.register(SeekerModelTwo)
+admin.site.register(SeekerModelThree)
+admin.site.register(EmployerModelTwo)
+admin.site.register(EmployerModelThree)

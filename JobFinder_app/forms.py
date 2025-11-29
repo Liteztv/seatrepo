@@ -1,7 +1,75 @@
 from django import forms
 from django.utils.safestring import mark_safe
 from django.forms import ModelForm
-from .models import SeekerModel
+from .models import SeekerModelOne, EmployerModelOne, SeekerModelTwo, SeekerModelThree, EmployerModelTwo, EmployerModelThree
+
+
+
+
+class SeekerFormOne(ModelForm):
+    class Meta:
+        model = SeekerModelOne
+        fields = ['first_name','last_name','total_years_of_experience',
+                  'html_experience','css_experience']
+class SeekerFormTwo(ModelForm):
+    class Meta:
+        model = SeekerModelTwo
+        fields = ['python_experience','java_experience', 'javascript_experience',
+                  'cplusplus_experience','csharp_experience','ruby_experience']
+        
+
+class SeekerFormThree(ModelForm):
+
+    class Meta:
+        model = SeekerModelThree
+        fields = ['react_experience','vue_experience','angular_experience',
+                  'django_experience','flask_experience','ruby_on_rails_experience',
+                  'fastapi_experience','laravel_experience','express_experience',
+                  'springboot_experience','springboot_experience','aspnet_experience',
+                  'oracle_experience','mysql_experience','sqlite_experience',
+                  'mongodb_experience','postgresql_experience'
+                  ]
+
+
+
+
+
+
+
+class EmployerFormTwo(ModelForm):
+
+    class Meta:
+        model = EmployerModelOne
+        fields = ['total_years_of_experience',
+                  'html_experience','css_experience'
+                  ]
+        
+class EmployerFormTwo(ModelForm):
+    class Meta:
+        model = EmployerModelTwo
+        fields = ['python_experience','java_experience', 'javascript_experience',
+                  'cplusplus_experience','csharp_experience','ruby_experience']
+        
+class EmployerFormThree(ModelForm):
+    class Meta:
+        model = EmployerModelThree
+        fields = ['react_experience','vue_experience','angular_experience',
+                  'django_experience','flask_experience','ruby_on_rails_experience',
+                  'fastapi_experience','laravel_experience','express_experience',
+                  'springboot_experience','springboot_experience','aspnet_experience',
+                  'oracle_experience','mysql_experience','sqlite_experience',
+                  'mongodb_experience','postgresql_experience'
+                  ]
+
+
+    
+    
+
+
+
+
+
+
 
 
 ##class SeekerForm(forms.Form):
@@ -45,12 +113,3 @@ from .models import SeekerModel
 #     class Meta:
 #         model = NameModel
 #         fields = ['first_name','last_name']
-
-class SeekerForm(ModelForm):
-    class Meta:
-        model = SeekerModel
-        exclude = []
-
-
-    
-    
