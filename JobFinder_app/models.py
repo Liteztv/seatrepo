@@ -4,8 +4,8 @@ from django.contrib.auth.models import User
 
 
 
-class User(models.Model):
-    pass
+# class User(AbstractUser):
+#     pass
 
 class SeekerModelOne(models.Model):
     first_name = models.CharField(max_length=30, null=True)
