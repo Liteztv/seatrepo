@@ -1,34 +1,53 @@
 from django import forms
+from django.contrib.auth.models import User
 from django.utils.safestring import mark_safe
 from django.forms import ModelForm
-from .models import SeekerModelOne, EmployerModelOne, SeekerModelTwo, SeekerModelThree, EmployerModelTwo, EmployerModelThree
+from .models import SeekerModelOne, EmployerModelOne, SeekerModelTwo, SeekerModelThree, EmployerModelTwo, EmployerModelThree, Profile
 
 
 
+class RegistrationForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput())
+    role = forms.ChoiceField(choices=Profile.ROLE_CHOICES)
+
+    class Meta:
+        model = User
+        fields = ["username", "email", "password"]
+
+
+class LoginForm(forms.Form):
+    username = forms.CharField()
+    password = forms.CharField(widget=forms.PasswordInput())
 
 class SeekerFormOne(ModelForm):
     class Meta:
         model = SeekerModelOne
-        fields = ['first_name','last_name','total_years_of_experience',
-                  'html_experience','css_experience']
+        exclude = ('user',)
+        fields = '__all__'
+        # fields = ['first_name','last_name','total_years_of_experience',
+        #           'html_experience','css_experience']
 class SeekerFormTwo(ModelForm):
     class Meta:
         model = SeekerModelTwo
-        fields = ['python_experience','java_experience', 'javascript_experience',
-                  'cplusplus_experience','csharp_experience','ruby_experience']
+        exclude = ('user',)
+        fields = '__all__'
+        # fields = ['python_experience','java_experience', 'javascript_experience',
+        #           'cplusplus_experience','csharp_experience','ruby_experience']
         
 
 class SeekerFormThree(ModelForm):
 
     class Meta:
         model = SeekerModelThree
-        fields = ['react_experience','vue_experience','angular_experience',
-                  'django_experience','flask_experience','ruby_on_rails_experience',
-                  'fastapi_experience','laravel_experience','express_experience',
-                  'springboot_experience','springboot_experience','aspnet_experience',
-                  'oracle_experience','mysql_experience','sqlite_experience',
-                  'mongodb_experience','postgresql_experience'
-                  ]
+        exclude = ('user',)
+        fields = '__all__'
+        # fields = ['react_experience','vue_experience','angular_experience',
+        #           'django_experience','flask_experience','ruby_on_rails_experience',
+        #           'fastapi_experience','laravel_experience','express_experience',
+        #           'springboot_experience','springboot_experience','aspnet_experience',
+        #           'oracle_experience','mysql_experience','sqlite_experience',
+        #           'mongodb_experience','postgresql_experience'
+        #           ]
 
 
 
@@ -40,26 +59,32 @@ class EmployerFormOne(ModelForm):
 
     class Meta:
         model = EmployerModelOne
-        fields = ['total_years_of_experience',
-                  'html_experience','css_experience'
-                  ]
+        exclude = ('employer',)
+        fields = '__all__'
+        # fields = ['total_years_of_experience',
+        #           'html_experience','css_experience'
+        #           ]
         
 class EmployerFormTwo(ModelForm):
     class Meta:
         model = EmployerModelTwo
-        fields = ['python_experience','java_experience', 'javascript_experience',
-                  'cplusplus_experience','csharp_experience','ruby_experience']
+        exclude = ('employer',)
+        fields = '__all__'
+        # fields = ['python_experience','java_experience', 'javascript_experience',
+        #           'cplusplus_experience','csharp_experience','ruby_experience']
         
 class EmployerFormThree(ModelForm):
     class Meta:
         model = EmployerModelThree
-        fields = ['react_experience','vue_experience','angular_experience',
-                  'django_experience','flask_experience','ruby_on_rails_experience',
-                  'fastapi_experience','laravel_experience','express_experience',
-                  'springboot_experience','springboot_experience','aspnet_experience',
-                  'oracle_experience','mysql_experience','sqlite_experience',
-                  'mongodb_experience','postgresql_experience'
-                  ]
+        exclude = ('employer',)
+        fields = '__all__'
+        # fields = ['react_experience','vue_experience','angular_experience',
+        #           'django_experience','flask_experience','ruby_on_rails_experience',
+        #           'fastapi_experience','laravel_experience','express_experience',
+        #           'springboot_experience','springboot_experience','aspnet_experience',
+        #           'oracle_experience','mysql_experience','sqlite_experience',
+        #           'mongodb_experience','postgresql_experience'
+        #           ]
 
 
     

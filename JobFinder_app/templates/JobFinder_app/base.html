@@ -1,106 +1,124 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device.width, initial-scale=1">
-        <title>Seat at the Table</title>
+<html data-theme="light">
+<head>
+    <title>{% block title %}LiteSpeedJobs{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-        <style>
-            p{
-                font-size: 20pt;
-                
-            }
-            body{
-                background-color: black;
-                color: white;
-            }
-            h1{
-                font-family: Verdana, Geneva, Tahoma, sans-serif;
-                font-size: 32pt;
-                font-style: none;
-                font-weight: none;
-            }
-            h3{
-                font-family: Verdana, Geneva, Tahoma, sans-serif;
-                font-size: 26pt;
-                font-style: none;
-                font-weight: none;
-            }
-            button.menuButton{
-                align-self: center;
-                height: 160;
-                width: 80%;
-                background-color: slategrey;
-                border: none;
-                color: white;
-                padding: 15px 32px;
-                text-align: center;
-                text-decoration: none;
-                font-weight: bold;
-                font-style: none;
-                display: inline-block;
-                font-size: 24px; 
-            }
-            div.homeBody{
-                text-align: center;
-                align-content: center;
-            }
-            .myfieldclass{
-                color:red;
-            }
+    <style>
+        /* Dark mode styles */
+        [data-theme="dark"] {
+            background-color: #121212 !important;
+            color: #e0e0e0 !important;
+        }
 
-            button.homer{
-                align-content: center;
-                height: 160;
-                width: 20%;
-                background-color: slategrey;
-                border: none;
-                color: white;
-                padding: 15px 32px;
-                text-align: center;
-                text-decoration: none;
-                font-weight: bold;
-                font-style: none;
-                display: inline-block;
-                font-size: 2vw; 
-            }
-            div.stpbody{
-                text-align: start;
-                align-content: start;
-                font-family: Verdana, Geneva, Tahoma, sans-serif;
-                font-size: 20pt;
-                
-                font-style: none;
-                font-weight: none;
-            }
-            
-            
+        [data-theme="dark"] .card {
+            background-color: #1e1e1e !important;
+            color: #fff !important;
+            border: 1px solid #333;
+        }
 
-        </style>
+        [data-theme="dark"] .navbar {
+            background-color: #000 !important;
+        }
 
-    </head>
+        [data-theme="dark"] .btn-primary {
+            background-color: #3a7bd5 !important;
+            border-color: #3a7bd5 !important;
+        }
 
-    <body>
+        [data-theme="dark"] .btn-outline-light {
+            border-color: #fff !important;
+            color: #fff !important;
+        }
 
+        [data-theme="dark"] input, 
+        [data-theme="dark"] select, 
+        [data-theme="dark"] textarea {
+            background-color: #222 !important;
+            color: #fff !important;
+            border: 1px solid #444 !important;
+        }
 
+        [data-theme="dark"] .form-control:focus {
+            background-color: #333 !important;
+            color: #fff !important;
+        }
 
-<!-- Content Container -->
-<div class="container">
-    <div class="homeBody">
-    
-    <!-- <form action="/Report/" type="POST">
-        <button class ="homer" type="submit" value="Home Button">Incident Reporting</button>
-        </form> -->
+        .dark-toggle {
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+
+        <a class="navbar-brand" href="{% url 'landing' %}">LiteSpeedJobs</a>
+
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto">
+
+                <!-- DARK MODE TOGGLE -->
+                <li class="nav-item me-3">
+                    <span class="nav-link dark-toggle text-white">
+                        🌙 Dark Mode
+                    </span>
+                </li>
+
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link disabled text-white-50">
+                            Logged in as <strong>{{ user.username }}</strong>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'logout' %}" class="btn btn-outline-light ms-3">Logout</a>
+                    </li>
+
+                {% else %}
+                    <li class="nav-item">
+                        <a href="{% url 'login' %}" class="btn btn-outline-light me-2">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'register' %}" class="btn btn-primary">Register</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
     </div>
-            
-                
-            
-    {% block content %}
-        
+</nav>
 
-    {% endblock %}
-
+<div class="container mt-4">
+    {% block content %}{% endblock %}
 </div>
 
-    </body>
+<script>
+    // Detect saved theme
+    const savedTheme = localStorage.getItem("theme") || "light";
+    document.documentElement.setAttribute("data-theme", savedTheme);
+
+    // Toggle theme handler
+    document.querySelector(".dark-toggle").addEventListener("click", () => {
+        const currentTheme = document.documentElement.getAttribute("data-theme");
+        const newTheme = currentTheme === "light" ? "dark" : "light";
+
+        document.documentElement.setAttribute("data-theme", newTheme);
+        localStorage.setItem("theme", newTheme);
+    });
+</script>
+
+</body>
 </html>
+
+
+
+
+
+
+
+
+
+

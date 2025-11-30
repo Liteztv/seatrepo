@@ -4,17 +4,38 @@ from django.contrib.auth.models import User
 
 
 
-# class User(AbstractUser):
-#     pass
+
+class Profile(models.Model):
+    ROLE_CHOICES = (
+        ('seeker', 'Job Seeker'),
+        ('employer', 'Employer'),
+    )
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name="profile"
+    )
+    role = models.CharField(
+        max_length=20,
+        choices=ROLE_CHOICES,
+        blank=True,
+        null=True,
+    )
+
+    def __str__(self):
+        return f"{self.user.username} - {self.role or 'No role set'}"
 
 class SeekerModelOne(models.Model):
+    user = models.OneToOneField(User,null=True, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=30, null=True)
     last_name = models.CharField(max_length=30, null=True)
     total_years_of_experience = models.IntegerField(null=True)
     html_experience = models.IntegerField(null=True)
     css_experience = models.IntegerField(null=True,verbose_name='CSS Experience')
 
-class SeekerModelTwo(models.Model):    
+class SeekerModelTwo(models.Model):   
+    user = models.OneToOneField(User,null=True, on_delete=models.CASCADE) 
     python_experience = models.IntegerField(null=True)
     java_experience = models.IntegerField(null=True)
     javascript_experience = models.IntegerField(null=True, verbose_name='JavaScript Experience')
@@ -23,6 +44,7 @@ class SeekerModelTwo(models.Model):
     ruby_experience = models.IntegerField(null=True)
 
 class SeekerModelThree(models.Model):
+    user = models.OneToOneField(User,null=True, on_delete=models.CASCADE)
     react_experience = models.IntegerField(null=True)
     vue_experience = models.IntegerField(null=True, verbose_name='Vue.js Experience')
     angular_experience = models.IntegerField(null=True)
@@ -41,11 +63,13 @@ class SeekerModelThree(models.Model):
     postgresql_experience = models.IntegerField(null=True, verbose_name='PostgreSQL Experience')
 
 class EmployerModelOne(models.Model):
+    employer = models.ForeignKey(User,null=True, on_delete=models.CASCADE)
     total_years_of_experience = models.IntegerField(null=True)
     html_experience = models.IntegerField(null=True)
     css_experience = models.IntegerField(null=True, verbose_name='CSS Experience')
     
 class EmployerModelTwo(models.Model):
+    employer = models.ForeignKey(User,null=True, on_delete=models.CASCADE)
     python_experience = models.IntegerField(null=True)
     java_experience = models.IntegerField(null=True)
     javascript_experience = models.IntegerField(null=True, verbose_name='JavaScript Experience')
@@ -54,6 +78,7 @@ class EmployerModelTwo(models.Model):
     ruby_experience = models.IntegerField(null=True)
 
 class EmployerModelThree(models.Model):
+    employer = models.ForeignKey(User,null=True, on_delete=models.CASCADE)
     react_experience = models.IntegerField(null=True)
     vue_experience = models.IntegerField(null=True, verbose_name='Vue.js Experience')
     angular_experience = models.IntegerField(null=True)
@@ -70,6 +95,9 @@ class EmployerModelThree(models.Model):
     sqlite_experience = models.IntegerField(null=True, verbose_name='SQLite Experience')
     mongodb_experience = models.IntegerField(null=True)
     postgresql_experience = models.IntegerField(null=True, verbose_name='PostgreSQL Experience')
+
+    class EmployerModelFour(models.Model):
+        pass
 
 
 

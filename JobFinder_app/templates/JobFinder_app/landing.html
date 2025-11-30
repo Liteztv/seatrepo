@@ -1,0 +1,52 @@
+{% extends "JobFinder_app/base.html" %}
+{% block title %}Welcome to LiteSpeedJobs{% endblock %}
+
+{% block content %}
+
+<div class="text-center my-5">
+    <h1 class="display-4 fw-bold">Welcome to LiteSpeedJobs</h1>
+    <p class="lead mb-4">
+        The fastest way to match employers with skilled job seekers — instantly and accurately.
+    </p>
+
+    {% if user.is_authenticated %}
+        <a href="{% url 'role_redirect' %}" class="btn btn-success btn-lg">
+            Go to Dashboard
+        </a>
+    {% else %}
+        <a href="{% url 'register' %}" class="btn btn-primary btn-lg me-2">
+            Get Started
+        </a>
+        <a href="{% url 'login' %}" class="btn btn-outline-secondary btn-lg">
+            Login
+        </a>
+    {% endif %}
+</div>
+
+<!-- Features Section -->
+<div class="row text-center mt-5">
+
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm p-4">
+            <h4>Lightning-Fast Matching</h4>
+            <p>Instantly match job seekers with employers using 30+ skill metrics.</p>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm p-4">
+            <h4>Three-Step Profile System</h4>
+            <p>Create detailed profiles for highly accurate skill-based comparisons.</p>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm p-4">
+            <h4>Role-Based Dashboards</h4>
+            <p>Custom dashboards tailored for employers and job seekers.</p>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
