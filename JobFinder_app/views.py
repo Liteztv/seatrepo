@@ -53,18 +53,21 @@ def match_seekers(employer_user):
     return seeker_users
 
 
+# def employer_dashboard(request):
+#     employer_user = request.user
+#     matches = match_seekers(employer_user)
+
+#     seekers = User.objects.filter(id__in=matches)
+
+#     return render(request, "JobFinder_app/employer_dashboard.html", {
+#         "seekers": seekers
+#     })
+
 def employer_dashboard(request):
-    employer_user = request.user
-    matches = match_seekers(employer_user)
-
-    seekers = User.objects.filter(id__in=matches)
-
-    return render(request, "JobFinder_app/employer_dashboard.html", {
-        "seekers": seekers
-    })
+    return render(request, 'JobFinder_app/employer_dashboard.html')
 
 def seeker_dashboard(request):
-    return render(request, "JobFinder_app/eeker_dashboard.html")
+    return render(request, "JobFinder_app/seeker_dashboard.html")
 
 
 
@@ -181,6 +184,8 @@ def login_view(request):
 
     return render(request, "JobFinder_app/login.html", {"form": form})
 
+
+
 def register_view(request):
     if request.method == "POST":
         form = RegistrationForm(request.POST)
@@ -200,7 +205,7 @@ def register_view(request):
     else:
         form = RegistrationForm()
 
-    return render(request, "registration.html", {"form": form})
+    return render(request, "JobFinder_app/registration.html", {"form": form})
 
 
 from .utils import get_user_profile

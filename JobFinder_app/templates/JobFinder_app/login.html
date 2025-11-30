@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "JobFinder_app/base.html" %}
 {% block title %}Login - LiteSpeedJobs{% endblock %}
 
 {% block content %}
@@ -11,7 +11,7 @@
             <div class="alert alert-danger">{{ error }}</div>
         {% endif %}
 
-        <form method="POST" action="">
+        <form method="POST" action="{% url 'login' %}">
             {% csrf_token %}
             {{ form.as_p }}
 

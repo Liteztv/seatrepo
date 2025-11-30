@@ -12,7 +12,7 @@ class Profile(models.Model):
     )
 
     user = models.OneToOneField(
-        User,
+        User,null=True,
         on_delete=models.CASCADE,
         related_name="profile"
     )
@@ -63,13 +63,13 @@ class SeekerModelThree(models.Model):
     postgresql_experience = models.IntegerField(null=True, verbose_name='PostgreSQL Experience')
 
 class EmployerModelOne(models.Model):
-    employer = models.ForeignKey(User,null=True, on_delete=models.CASCADE)
+    user = models.OneToOneField(User,null=True, on_delete=models.CASCADE)
     total_years_of_experience = models.IntegerField(null=True)
     html_experience = models.IntegerField(null=True)
     css_experience = models.IntegerField(null=True, verbose_name='CSS Experience')
     
 class EmployerModelTwo(models.Model):
-    employer = models.ForeignKey(User,null=True, on_delete=models.CASCADE)
+    user = models.OneToOneField(User,null=True, on_delete=models.CASCADE)
     python_experience = models.IntegerField(null=True)
     java_experience = models.IntegerField(null=True)
     javascript_experience = models.IntegerField(null=True, verbose_name='JavaScript Experience')
@@ -78,7 +78,7 @@ class EmployerModelTwo(models.Model):
     ruby_experience = models.IntegerField(null=True)
 
 class EmployerModelThree(models.Model):
-    employer = models.ForeignKey(User,null=True, on_delete=models.CASCADE)
+    user = models.OneToOneField(User,null=True, on_delete=models.CASCADE)
     react_experience = models.IntegerField(null=True)
     vue_experience = models.IntegerField(null=True, verbose_name='Vue.js Experience')
     angular_experience = models.IntegerField(null=True)

@@ -59,7 +59,7 @@ class EmployerFormOne(ModelForm):
 
     class Meta:
         model = EmployerModelOne
-        exclude = ('employer',)
+        exclude = ('user',)
         fields = '__all__'
         # fields = ['total_years_of_experience',
         #           'html_experience','css_experience'
@@ -68,7 +68,7 @@ class EmployerFormOne(ModelForm):
 class EmployerFormTwo(ModelForm):
     class Meta:
         model = EmployerModelTwo
-        exclude = ('employer',)
+        exclude = ('user',)
         fields = '__all__'
         # fields = ['python_experience','java_experience', 'javascript_experience',
         #           'cplusplus_experience','csharp_experience','ruby_experience']
@@ -76,7 +76,7 @@ class EmployerFormTwo(ModelForm):
 class EmployerFormThree(ModelForm):
     class Meta:
         model = EmployerModelThree
-        exclude = ('employer',)
+        exclude = ('user',)
         fields = '__all__'
         # fields = ['react_experience','vue_experience','angular_experience',
         #           'django_experience','flask_experience','ruby_on_rails_experience',
