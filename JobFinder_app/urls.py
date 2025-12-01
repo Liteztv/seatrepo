@@ -14,16 +14,16 @@ urlpatterns = [
     path("login/", views.login_view, name="login"),
     path("logout/", views.logout_view, name="logout"),
     path("role-redirect/", views.role_redirect, name="role_redirect"),
-    path("employer/dashboard/", views.employer_dashboard, name="employer_dashboard"),
-    path("seeker/dashboard/", views.seeker_dashboard, name="seeker_dashboard"),
+    path("employer_dashboard/", views.employer_dashboard, name="employer_dashboard"),
+    path("seeker_dashboard/", views.seeker_dashboard, name="seeker_dashboard"),
 
     # Seeker Forms
-    path("seeker/form1/", views.seeker_form_one, name="seeker_form1"),
-    path("seeker/form2/", views.seeker_form_two, name="seeker_form2"),
-    path("seeker/form3/", views.seeker_form_three, name="seeker_form3"),
+    path("seeker_form1/", views.seeker_form_one, name="seeker_form1"),
+    path("seeker_form2/", views.seeker_form_two, name="seeker_form2"),
+    path("seeker_form3/", views.seeker_form_three, name="seeker_form3"),
 
     # Employer Forms
-    path("employer/form1/", views.employer_form_one, name="employer_form1"),
-    path("employer/form2/", views.employer_form_two, name="employer_form2"),
-    path("employer/form3/", views.employer_form_three, name="employer_form3"),
+    path("employer_form1/", views.employer_form_one, name="employer_form1"),
+    path("employer_form2/", views.employer_form_two, name="employer_form2"),
+    path("employer_form3/", views.employer_form_three, name="employer_form3"),
 ]
