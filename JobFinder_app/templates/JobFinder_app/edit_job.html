@@ -1,0 +1,45 @@
+{% extends "JobFinder_app/base.html" %}
+{% block title %}Edit Job – LiteSpeedJobs{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="col-md-10 mx-auto">
+        <div class="card shadow p-4">
+
+            <h2 class="mb-3">
+                <i class="bi bi-pencil-square"></i>
+                Edit Job: {{ job.title }}
+            </h2>
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <!-- Job Details -->
+                <h4 class="mt-4">Job Details</h4>
+                <hr>
+                {{ job_form.as_p }}
+
+                <!-- Requirements 1 -->
+                <h4 class="mt-4">General Experience Requirements</h4>
+                <hr>
+                {{ req1_form.as_p }}
+
+                <!-- Requirements 2 -->
+                <h4 class="mt-4">Programming Languages</h4>
+                <hr>
+                {{ req2_form.as_p }}
+
+                <!-- Requirements 3 -->
+                <h4 class="mt-4">Frameworks & Databases</h4>
+                <hr>
+                {{ req3_form.as_p }}
+
+                <button type="submit" class="btn btn-primary btn-lg w-100 mt-4">
+                    <i class="bi bi-save"></i> Save Changes
+                </button>
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

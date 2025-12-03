@@ -5,9 +5,9 @@
 <div class="container mt-4">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Your Job Listings</h2>
+        <h2>Your Jobs</h2>
         <a href="{% url 'create_job' %}" class="btn btn-success">
-            + Create New Job
+            <i class="bi bi-plus-circle"></i> New Job
         </a>
     </div>
 
@@ -16,12 +16,27 @@
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
 
-                    <!-- Job Title -->
-                    <h4 class="mb-1">{{ item.job.title }}</h4>
+                    <!-- Job Header with Edit/Delete -->
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4>{{ item.job.title }}</h4>
+
+                        <div>
+                            <a href="{% url 'edit_job' item.job.id %}" 
+                               class="btn btn-sm btn-outline-primary me-2">
+                                <i class="bi bi-pencil-square"></i> Edit
+                            </a>
+
+                            <a href="{% url 'delete_job' item.job.id %}" 
+                               class="btn btn-sm btn-outline-danger"
+                               onclick="return confirm('Delete this job?');">
+                                <i class="bi bi-trash"></i> Delete
+                            </a>
+                        </div>
+                    </div>
 
                     <!-- Location -->
                     {% if item.job.location %}
-                        <p class="text-muted mb-2">
+                        <p class="text-muted">
                             <i class="bi bi-geo-alt"></i> {{ item.job.location }}
                         </p>
                     {% endif %}
@@ -31,32 +46,74 @@
                         <p>{{ item.job.description }}</p>
                     {% endif %}
 
+                    <!-- Interview Questions -->
+                    {% if item.job.interview_questions %}
+                        <h6 class="mt-3">Interview Questions</h6>
+
+                        <button class="btn btn-outline-secondary btn-sm mb-2" 
+                                type="button" 
+                                data-bs-toggle="collapse" 
+                                data-bs-target="#questions{{ item.job.id }}">
+                            Show Questions
+                        </button>
+
+                        <div class="collapse" id="questions{{ item.job.id }}">
+                            <ul class="list-group mb-3">
+                                {% for q in item.job.interview_questions.splitlines %}
+                                    {% if q.strip %}
+                                        <li class="list-group-item">{{ q }}</li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
                     <hr>
 
-                    <!-- Matching Seekers -->
-                    <h5>Matching Job Seekers ({{ item.seekers.count }})</h5>
+                    <!-- Candidates Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5>Candidates</h5>
 
-                    {% if item.seekers %}
-                        <ul class="list-group mt-3">
-                            {% for seeker in item.seekers %}
-                                <li class="list-group-item">
-                                    {{ seeker.username }}
-                                    {% if seeker.email %}
-                                        <span class="text-muted"> — {{ seeker.email }}</span>
-                                    {% endif %}
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p class="text-muted mt-2">No matching seekers yet.</p>
-                    {% endif %}
+                        <span class="badge bg-primary fs-6">
+                            {{ item.seekers|length }} matched
+                        </span>
+                    </div>
+
+                    <!-- Collapsible Candidates -->
+                    <button class="btn btn-outline-secondary btn-sm" 
+                            type="button"
+                            data-bs-toggle="collapse" 
+                            data-bs-target="#candidates{{ item.job.id }}">
+                        Show Candidates
+                    </button>
+
+                    <div class="collapse mt-3" id="candidates{{ item.job.id }}">
+                        {% if item.seekers %}
+                            <ul class="list-group">
+                                {% for seeker in item.seekers %}
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <div>
+                                            <strong>{{ seeker.label }}</strong><br>
+                                            <small class="text-muted">Profile hidden</small>
+                                        </div>
+
+                                        <span class="badge bg-info text-dark align-self-center">
+                                            {{ seeker.match_percentage|default:85 }}%
+                                        </span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted mt-2">No candidates match this job yet.</p>
+                        {% endif %}
+                    </div>
 
                 </div>
             </div>
         {% endfor %}
     {% else %}
         <div class="alert alert-info">
-            You haven't created any jobs yet.  
+            You haven’t created any jobs yet.<br>
             <a href="{% url 'create_job' %}">Create your first job</a>.
         </div>
     {% endif %}

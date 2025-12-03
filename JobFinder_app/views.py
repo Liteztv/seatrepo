@@ -1,4 +1,4 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect, get_object_or_404
 from django.db.models import Q
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
@@ -9,6 +9,59 @@ from .forms import ( SeekerFormOne, SeekerFormTwo, SeekerFormThree, Registration
 from .models import ( SeekerModelOne, SeekerModelThree, SeekerModelTwo, Profile, 
                      Job, JobRequirementOne, JobRequirementTwo, JobRequirementThree,
                      )
+
+
+def edit_job(request, job_id):
+    job = get_object_or_404(Job, id=job_id)
+
+    # Ensure only the employer who created the job can edit it
+    if job.user != request.user:
+        return redirect("employer_dashboard")
+
+    req1 = job.req_one
+    req2 = job.req_two
+    req3 = job.req_three
+
+    if request.method == "POST":
+        job_form = JobForm(request.POST, instance=job)
+        req1_form = JobRequirementOneForm(request.POST, instance=req1)
+        req2_form = JobRequirementTwoForm(request.POST, instance=req2)
+        req3_form = JobRequirementThreeForm(request.POST, instance=req3)
+
+        if job_form.is_valid() and req1_form.is_valid() and req2_form.is_valid() and req3_form.is_valid():
+            job_form.save()
+            req1_form.save()
+            req2_form.save()
+            req3_form.save()
+
+            return redirect("employer_dashboard")
+
+    else:
+        job_form = JobForm(instance=job)
+        req1_form = JobRequirementOneForm(instance=req1)
+        req2_form = JobRequirementTwoForm(instance=req2)
+        req3_form = JobRequirementThreeForm(instance=req3)
+
+    return render(request, "JobFinder_app/edit_job.html", {
+        "job_form": job_form,
+        "req1_form": req1_form,
+        "req2_form": req2_form,
+        "req3_form": req3_form,
+        "job": job,
+    })
+
+def delete_job(request, job_id):
+    job = get_object_or_404(Job, id=job_id)
+
+    # Only the employer who created the job may delete it
+    if job.user != request.user:
+        return redirect("employer_dashboard")
+
+    if request.method == "POST":
+        job.delete()
+        return redirect("employer_dashboard")
+
+    return render(request, "JobFinder_app/delete_job.html", {"job": job})
 
 
 def create_job(request):
@@ -105,15 +158,31 @@ def match_seekers_for_job(job):
 #         "seekers": seekers
 #     })
 
+from django.contrib.auth.models import User
+from .models import Job  # and your JobRequirement models etc.
+
 def employer_dashboard(request):
     jobs = Job.objects.filter(user=request.user).order_by("-created_at")
 
     job_data = []
     for job in jobs:
-        seekers = match_seekers_for_job(job)
+        seekers_qs = match_seekers_for_job(job)  # still returns User queryset
+
+        # Build anonymous seeker objects
+        anonymous_seekers = []
+        for idx, seeker in enumerate(seekers_qs, start=1):
+            anonymous_seekers.append({
+                "label": f"Candidate #{idx}",
+                # keep ID if you ever want a “reveal” feature later;
+                # not used in template now
+                "user_id": seeker.id,
+                # optional matching percentage - static for now or computed if you like
+                "match_percentage": 85,
+            })
+
         job_data.append({
             "job": job,
-            "seekers": seekers,
+            "seekers": anonymous_seekers,
         })
 
     return render(request, "JobFinder_app/employer_dashboard.html", {
@@ -310,34 +379,7 @@ def seeker_form_three(request):
         return redirect("seeker_dashboard")
     return render(request, "JobFinder_app/seeker_form3.html", {"form": form})
 
-def employer_form_one(request):
-    form = EmployerFormOne(request.POST or None)
-    if request.method == "POST" and form.is_valid():
-        instance = form.save(commit=False)
-        instance.user = request.user
-        instance.save()
-        return redirect("employer_form2")
-    return render(request, "JobFinder_app/employer_form1.html", {"form": form})
 
-
-def employer_form_two(request):
-    form = EmployerFormTwo(request.POST or None)
-    if request.method == "POST" and form.is_valid():
-        instance = form.save(commit=False)
-        instance.user = request.user
-        instance.save()
-        return redirect("employer_form3")
-    return render(request, "JobFinder_app/employer_form2.html", {"form": form})
-
-
-def employer_form_three(request):
-    form = EmployerFormThree(request.POST or None)
-    if request.method == "POST" and form.is_valid():
-        instance = form.save(commit=False)
-        instance.user = request.user
-        instance.save()
-        return redirect("employer_dashboard")
-    return render(request, "JobFinder_app/employer_form3.html", {"form": form})
 
 def landing_view(request):
     return render(request, "JobFinder_app/landing.html")

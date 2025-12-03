@@ -14,7 +14,26 @@
 
                 <h4 class="mt-4">Job Details</h4>
                 <hr>
-                {{ job_form.as_p }}
+                {{ job_form.title.errors }}
+                {{ job_form.location.errors }}
+                {{ job_form.description.errors }}
+
+                <p><strong>Title</strong></p>
+                {{ job_form.title }}
+
+                <p class="mt-2"><strong>Location</strong></p>
+                {{ job_form.location }}
+
+                <p class="mt-2"><strong>Description</strong></p>
+                {{ job_form.description }}
+
+                <h4 class="mt-4">Interview Questions (Optional)</h4>
+                <small class="text-muted">
+                    Enter one question per line. These will be used when interviewing top candidates.
+                </small>
+                <hr>
+                {{ job_form.interview_questions }}
+
 
                 <h4 class="mt-4">General Experience</h4>
                 <small class="text-muted">Only positive values affect matching.</small>

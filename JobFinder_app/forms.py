@@ -2,7 +2,9 @@ from django import forms
 from django.contrib.auth.models import User
 from django.utils.safestring import mark_safe
 from django.forms import ModelForm
-from .models import SeekerModelOne, SeekerModelTwo, SeekerModelThree, Profile, Job, JobRequirementOne, JobRequirementTwo, JobRequirementThree
+from .models import ( SeekerModelOne, SeekerModelTwo, SeekerModelThree, Profile, Job, JobRequirementOne, JobRequirementTwo, JobRequirementThree,
+                     
+                      )
 
 
 
@@ -52,7 +54,12 @@ class SeekerFormThree(ModelForm):
 class JobForm(forms.ModelForm):
     class Meta:
         model = Job
-        fields = ["title", "location", "description"]
+        fields = ["title", "location", "description", "interview_questions"]
+        widgets = {
+            "interview_questions": forms.Textarea(attrs={"rows": 5}),
+        }
+
+
 
 
 class JobRequirementOneForm(forms.ModelForm):

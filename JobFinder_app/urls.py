@@ -7,6 +7,8 @@ urlpatterns = [
     path('seekerviewtwo', views.seekertwo_view, name='seekerviewtwo'),
     path('seekerviewthree', views.seekerthree_view, name='seekerviewthree'),
     path('employerview',views.employer_view),
+    path("job/<int:job_id>/edit/", views.edit_job, name="edit_job"),
+    path("job/<int:job_id>/delete/", views.delete_job, name="delete_job"),
     # path('employerviewone',views.employerone_view, name='employerviewone'),
     # path('employerviewtwo',views.employertwo_view, name='employerviewtwo'),
     # path('employerviewthree',views.employerthree_view, name='employerviewthree'),

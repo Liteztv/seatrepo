@@ -68,13 +68,22 @@ class SeekerModelThree(models.Model):
 
 class Job(models.Model):
     user = models.ForeignKey(User,null=True, on_delete=models.CASCADE)  # employer
-    title = models.CharField(null=True,max_length=255)
+    title = models.CharField(null=True, max_length=255)
     location = models.CharField(max_length=255, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
+
+    # NEW FIELD ⬇️
+    interview_questions = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Enter one question per line."
+    )
+
     created_at = models.DateTimeField(null=True,auto_now_add=True)
 
     def __str__(self):
         return f"{self.title} ({self.user.username})"
+
 
 
 class JobRequirementOne(models.Model):
