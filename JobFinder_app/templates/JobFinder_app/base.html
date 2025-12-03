@@ -1,124 +1,93 @@
 <!DOCTYPE html>
-<html data-theme="light">
+<html lang="en" data-theme="light">
 <head>
+    <meta charset="UTF-8">
     <title>{% block title %}LiteSpeedJobs{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
-        /* Dark mode styles */
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #000000;
+            --card-bg: #ffffff;
+            --border-color: #dddddd;
+        }
+
         [data-theme="dark"] {
-            background-color: #121212 !important;
-            color: #e0e0e0 !important;
+            --bg-color: #121212;
+            --text-color: #ffffff;
+            --card-bg: #1f1f1f;
+            --border-color: #333333;
         }
 
-        [data-theme="dark"] .card {
-            background-color: #1e1e1e !important;
-            color: #fff !important;
-            border: 1px solid #333;
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
         }
 
-        [data-theme="dark"] .navbar {
-            background-color: #000 !important;
+        .card {
+            background-color: var(--card-bg);
+            border-color: var(--border-color) !important;
         }
 
-        [data-theme="dark"] .btn-primary {
-            background-color: #3a7bd5 !important;
-            border-color: #3a7bd5 !important;
-        }
-
-        [data-theme="dark"] .btn-outline-light {
-            border-color: #fff !important;
-            color: #fff !important;
-        }
-
-        [data-theme="dark"] input, 
-        [data-theme="dark"] select, 
-        [data-theme="dark"] textarea {
-            background-color: #222 !important;
-            color: #fff !important;
-            border: 1px solid #444 !important;
-        }
-
-        [data-theme="dark"] .form-control:focus {
-            background-color: #333 !important;
-            color: #fff !important;
-        }
-
-        .dark-toggle {
+        .navbar-dark-mode {
             cursor: pointer;
         }
     </style>
 </head>
 
-<body class="bg-light">
+<body>
 
 <!-- NAVBAR -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
+    <a class="navbar-brand" href="/">LiteSpeedJobs</a>
 
-        <a class="navbar-brand" href="{% url 'landing' %}">LiteSpeedJobs</a>
+    <div class="ms-auto d-flex align-items-center">
 
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav ms-auto">
+        <!-- Dark Mode Toggle -->
+        <span class="navbar-dark-mode me-3 text-white">
+            <i class="bi bi-moon-stars-fill"></i>
+        </span>
 
-                <!-- DARK MODE TOGGLE -->
-                <li class="nav-item me-3">
-                    <span class="nav-link dark-toggle text-white">
-                        🌙 Dark Mode
-                    </span>
-                </li>
+        {% if request.user.is_authenticated %}
+            <span class="text-white me-3">
+                Logged in as <strong>{{ request.user.username }}</strong>
+            </span>
+            <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">Logout</a>
+        {% endif %}
 
-                {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link disabled text-white-50">
-                            Logged in as <strong>{{ user.username }}</strong>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'logout' %}" class="btn btn-outline-light ms-3">Logout</a>
-                    </li>
-
-                {% else %}
-                    <li class="nav-item">
-                        <a href="{% url 'login' %}" class="btn btn-outline-light me-2">Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'register' %}" class="btn btn-primary">Register</a>
-                    </li>
-                {% endif %}
-            </ul>
-        </div>
     </div>
 </nav>
 
-<div class="container mt-4">
+<div class="container py-4">
     {% block content %}{% endblock %}
 </div>
 
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Dark Mode Script -->
 <script>
-    // Detect saved theme
-    const savedTheme = localStorage.getItem("theme") || "light";
-    document.documentElement.setAttribute("data-theme", savedTheme);
+    const root = document.documentElement;
+    const toggle = document.querySelector('.navbar-dark-mode');
 
-    // Toggle theme handler
-    document.querySelector(".dark-toggle").addEventListener("click", () => {
-        const currentTheme = document.documentElement.getAttribute("data-theme");
-        const newTheme = currentTheme === "light" ? "dark" : "light";
+    // Load saved preference
+    if (localStorage.getItem('theme') === 'dark') {
+        root.setAttribute('data-theme', 'dark');
+    }
 
-        document.documentElement.setAttribute("data-theme", newTheme);
-        localStorage.setItem("theme", newTheme);
+    toggle.addEventListener('click', () => {
+        let current = root.getAttribute('data-theme');
+        let next = current === 'light' ? 'dark' : 'light';
+        root.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
     });
 </script>
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-

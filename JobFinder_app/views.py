@@ -2,56 +2,98 @@ from django.shortcuts import render,redirect
 from django.db.models import Q
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
-from .forms import SeekerFormOne, SeekerFormTwo, SeekerFormThree, EmployerFormOne, EmployerFormTwo, EmployerFormThree, RegistrationForm, LoginForm
+from .forms import ( SeekerFormOne, SeekerFormTwo, SeekerFormThree, RegistrationForm, LoginForm,
+                    JobForm, JobRequirementOneForm, JobRequirementTwoForm, JobRequirementThreeForm,
+                    )
 # from django.urls import reverse
-from .models import SeekerModelOne, SeekerModelThree, SeekerModelTwo, EmployerModelOne, EmployerModelThree, EmployerModelTwo, Profile
+from .models import ( SeekerModelOne, SeekerModelThree, SeekerModelTwo, Profile, 
+                     Job, JobRequirementOne, JobRequirementTwo, JobRequirementThree,
+                     )
 
 
-def match_seekers(employer_user):
-    """ Returns seekers where ALL 3 seeker models meet or exceed employer requirements """
-    
-    emp1 = EmployerModelOne.objects.get(user=employer_user)
-    emp2 = EmployerModelTwo.objects.get(user=employer_user)
-    emp3 = EmployerModelThree.objects.get(user=employer_user)
+def create_job(request):
+    if request.method == "POST":
+        job_form = JobForm(request.POST)
+        req1_form = JobRequirementOneForm(request.POST)
+        req2_form = JobRequirementTwoForm(request.POST)
+        req3_form = JobRequirementThreeForm(request.POST)
+
+        if job_form.is_valid() and req1_form.is_valid() and req2_form.is_valid() and req3_form.is_valid():
+
+            job = job_form.save(commit=False)
+            job.user = request.user
+            job.save()
+
+            req1 = req1_form.save(commit=False)
+            req1.job = job
+            req1.save()
+
+            req2 = req2_form.save(commit=False)
+            req2.job = job
+            req2.save()
+
+            req3 = req3_form.save(commit=False)
+            req3.job = job
+            req3.save()
+
+            return redirect("employer_dashboard")
+
+    else:
+        job_form = JobForm()
+        req1_form = JobRequirementOneForm()
+        req2_form = JobRequirementTwoForm()
+        req3_form = JobRequirementThreeForm()
+
+    return render(request, "JobFinder_app/create_job.html", {
+        "job_form": job_form,
+        "req1_form": req1_form,
+        "req2_form": req2_form,
+        "req3_form": req3_form,
+    })
+
+
+def match_seekers_for_job(job):
+    req1 = job.req_one
+    req2 = job.req_two
+    req3 = job.req_three
 
     seekers1 = SeekerModelOne.objects.all()
     seekers2 = SeekerModelTwo.objects.all()
     seekers3 = SeekerModelThree.objects.all()
 
-    # FILTER FOR MODEL ONE (only employer fields > 0)
-    filters_1 = {
-        f"{field}__gte": getattr(emp1, field)
-        for field in ["total_years_of_experience", "html_experience", "css_experience"]
-        if getattr(emp1, field) and getattr(emp1, field) > 0
-    }
+    # Req1
+    filters_1 = {}
+    for field in ["total_years_of_experience", "html_experience", "css_experience"]:
+        val = getattr(req1, field)
+        if val and val > 0:
+            filters_1[f"{field}__gte"] = val
     seekers1 = seekers1.filter(**filters_1)
 
-    # MODEL TWO
-    fields2 = ["python_experience", "java_experience", "javascript_experience",
-               "cplusplus_experience", "csharp_experience", "ruby_experience"]
-    filters_2 = {
-        f"{field}__gte": getattr(emp2, field)
-        for field in fields2
-        if getattr(emp2, field) and getattr(emp2, field) > 0
-    }
+    # Req2
+    fields2 = ["python_experience","java_experience","javascript_experience","cplusplus_experience","csharp_experience","ruby_experience"]
+    filters_2 = {}
+    for field in fields2:
+        val = getattr(req2, field)
+        if val and val > 0:
+            filters_2[f"{field}__gte"] = val
     seekers2 = seekers2.filter(**filters_2)
 
-    # MODEL THREE
-    fields3 = [f.name for f in EmployerModelThree._meta.fields if f.name not in ("id", "user")]
-    filters_3 = {
-        f"{field}__gte": getattr(emp3, field)
-        for field in fields3
-        if getattr(emp3, field) and getattr(emp3, field) > 0
-    }
+    # Req3
+    fields3 = [f.name for f in JobRequirementThree._meta.fields if f.name not in ("id", "job")]
+    filters_3 = {}
+    for field in fields3:
+        val = getattr(req3, field)
+        if val and val > 0:
+            filters_3[f"{field}__gte"] = val
     seekers3 = seekers3.filter(**filters_3)
 
-    # MATCH SEEKERS WITH ALL 3 MODELS
-    seeker_users = set(seekers1.values_list("user", flat=True)) \
-                & set(seekers2.values_list("user", flat=True)) \
-                & set(seekers3.values_list("user", flat=True))
+    ids = (
+        set(seekers1.values_list("user", flat=True)) &
+        set(seekers2.values_list("user", flat=True)) &
+        set(seekers3.values_list("user", flat=True))
+    )
 
-    return seeker_users
-
+    return User.objects.filter(id__in=ids)
 
 # def employer_dashboard(request):
 #     employer_user = request.user
@@ -64,7 +106,20 @@ def match_seekers(employer_user):
 #     })
 
 def employer_dashboard(request):
-    return render(request, 'JobFinder_app/employer_dashboard.html')
+    jobs = Job.objects.filter(user=request.user).order_by("-created_at")
+
+    job_data = []
+    for job in jobs:
+        seekers = match_seekers_for_job(job)
+        job_data.append({
+            "job": job,
+            "seekers": seekers,
+        })
+
+    return render(request, "JobFinder_app/employer_dashboard.html", {
+        "job_data": job_data
+    })
+
 
 def seeker_dashboard(request):
     return render(request, "JobFinder_app/seeker_dashboard.html")
@@ -111,40 +166,40 @@ def seekerthree_view(request):
         form = SeekerFormThree()
         return render(request,'JobFinder_app/seekerexthree.html',context={'form': form})
     
-def employerone_view(request):
-    if request.method == 'POST':
-        form = EmployerFormOne(request.POST)
-        if form.is_valid():
-            form.save(form.cleaned_data)
-            return redirect('employerviewtwo')
+# def employerone_view(request):
+#     if request.method == 'POST':
+#         form = EmployerFormOne(request.POST)
+#         if form.is_valid():
+#             form.save(form.cleaned_data)
+#             return redirect('employerviewtwo')
     
-    else:
-        form = EmployerFormOne()
-        return render(request,'JobFinder_app/employerexone.html',context={'form': form})
+#     else:
+#         form = EmployerFormOne()
+#         return render(request,'JobFinder_app/employerexone.html',context={'form': form})
         
 
-def employertwo_view(request):
-    if request.method == 'POST':
-        form = EmployerFormTwo(request.POST)   
-        if form.is_valid():
-            form.save(form.cleaned_data)
-            return redirect('employerviewthree')
+# def employertwo_view(request):
+#     if request.method == 'POST':
+#         form = EmployerFormTwo(request.POST)   
+#         if form.is_valid():
+#             form.save(form.cleaned_data)
+#             return redirect('employerviewthree')
         
-    else:
-        form = EmployerFormTwo()
-        return render(request,'JobFinder_app/employerextwo.html',context={'form': form})
+#     else:
+#         form = EmployerFormTwo()
+#         return render(request,'JobFinder_app/employerextwo.html',context={'form': form})
     
 
-def employerthree_view(request):
-    if request.method == 'POST':
-        form = EmployerFormThree(request.POST)
-        if form.is_valid():
-            form.save(form.cleaned_data)
-            return render(request,'JobFinder_app/thanks.html')
+# def employerthree_view(request):
+#     if request.method == 'POST':
+#         form = EmployerFormThree(request.POST)
+#         if form.is_valid():
+#             form.save(form.cleaned_data)
+#             return render(request,'JobFinder_app/thanks.html')
         
-    else:
-        form = EmployerFormThree()
-        return render(request,'JobFinder_app/employerexthree.html',context={'form': form})
+#     else:
+#         form = EmployerFormThree()
+#         return render(request,'JobFinder_app/employerexthree.html',context={'form': form})
         
 
 

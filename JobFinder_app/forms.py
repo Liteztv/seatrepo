@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.utils.safestring import mark_safe
 from django.forms import ModelForm
-from .models import SeekerModelOne, EmployerModelOne, SeekerModelTwo, SeekerModelThree, EmployerModelTwo, EmployerModelThree, Profile
+from .models import SeekerModelOne, SeekerModelTwo, SeekerModelThree, Profile, Job, JobRequirementOne, JobRequirementTwo, JobRequirementThree
 
 
 
@@ -49,46 +49,31 @@ class SeekerFormThree(ModelForm):
         #           'mongodb_experience','postgresql_experience'
         #           ]
 
-
-
-
-
-
-
-class EmployerFormOne(ModelForm):
-
+class JobForm(forms.ModelForm):
     class Meta:
-        model = EmployerModelOne
-        exclude = ('user',)
-        fields = '__all__'
-        # fields = ['total_years_of_experience',
-        #           'html_experience','css_experience'
-        #           ]
-        
-class EmployerFormTwo(ModelForm):
-    class Meta:
-        model = EmployerModelTwo
-        exclude = ('user',)
-        fields = '__all__'
-        # fields = ['python_experience','java_experience', 'javascript_experience',
-        #           'cplusplus_experience','csharp_experience','ruby_experience']
-        
-class EmployerFormThree(ModelForm):
-    class Meta:
-        model = EmployerModelThree
-        exclude = ('user',)
-        fields = '__all__'
-        # fields = ['react_experience','vue_experience','angular_experience',
-        #           'django_experience','flask_experience','ruby_on_rails_experience',
-        #           'fastapi_experience','laravel_experience','express_experience',
-        #           'springboot_experience','springboot_experience','aspnet_experience',
-        #           'oracle_experience','mysql_experience','sqlite_experience',
-        #           'mongodb_experience','postgresql_experience'
-        #           ]
+        model = Job
+        fields = ["title", "location", "description"]
 
 
-    
-    
+class JobRequirementOneForm(forms.ModelForm):
+    class Meta:
+        model = JobRequirementOne
+        exclude = ("job",)
+
+
+class JobRequirementTwoForm(forms.ModelForm):
+    class Meta:
+        model = JobRequirementTwo
+        exclude = ("job",)
+
+
+class JobRequirementThreeForm(forms.ModelForm):
+    class Meta:
+        model = JobRequirementThree
+        exclude = ("job",)
+
+
+
 
 
 

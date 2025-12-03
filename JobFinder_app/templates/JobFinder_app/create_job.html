@@ -1,0 +1,39 @@
+{% extends "JobFinder_app/base.html" %}
+{% block title %}Create Job – LiteSpeedJobs{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="col-md-10 mx-auto">
+        <div class="card shadow p-4">
+            <h2 class="mb-3">
+                <i class="bi bi-briefcase-fill"></i> Create a New Job
+            </h2>
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <h4 class="mt-4">Job Details</h4>
+                <hr>
+                {{ job_form.as_p }}
+
+                <h4 class="mt-4">General Experience</h4>
+                <small class="text-muted">Only positive values affect matching.</small>
+                <hr>
+                {{ req1_form.as_p }}
+
+                <h4 class="mt-4">Programming Languages</h4>
+                <hr>
+                {{ req2_form.as_p }}
+
+                <h4 class="mt-4">Frameworks & Databases</h4>
+                <hr>
+                {{ req3_form.as_p }}
+
+                <button type="submit" class="btn btn-primary btn-lg w-100 mt-4">
+                    <i class="bi bi-save"></i> Save Job
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
