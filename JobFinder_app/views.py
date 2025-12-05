@@ -1,6 +1,9 @@
+from django.contrib import messages
 from django.shortcuts import render,redirect, get_object_or_404
 from django.db.models import Q
 from django.contrib.auth.models import User
+from django.views.decorators.http import require_http_methods
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from .forms import ( SeekerFormOne, SeekerFormTwo, SeekerFormThree, RegistrationForm, LoginForm,
                     JobForm, JobRequirementOneForm, JobRequirementTwoForm, JobRequirementThreeForm,
@@ -8,6 +11,7 @@ from .forms import ( SeekerFormOne, SeekerFormTwo, SeekerFormThree, Registration
 # from django.urls import reverse
 from .models import ( SeekerModelOne, SeekerModelThree, SeekerModelTwo, Profile, 
                      Job, JobRequirementOne, JobRequirementTwo, JobRequirementThree,
+                     InterviewAssignment, InterviewResponse, Message,
                      )
 
 
@@ -158,40 +162,59 @@ def match_seekers_for_job(job):
 #         "seekers": seekers
 #     })
 
-from django.contrib.auth.models import User
-from .models import Job  # and your JobRequirement models etc.
+
 
 def employer_dashboard(request):
     jobs = Job.objects.filter(user=request.user).order_by("-created_at")
 
     job_data = []
     for job in jobs:
-        seekers_qs = match_seekers_for_job(job)  # still returns User queryset
+        seekers_qs = match_seekers_for_job(job)
 
-        # Build anonymous seeker objects
-        anonymous_seekers = []
+        open_candidates = []
+        interviewed_candidates = []
+
         for idx, seeker in enumerate(seekers_qs, start=1):
-            anonymous_seekers.append({
+            # latest assignment for this job+seeker, if any
+            assignment = (
+                InterviewAssignment.objects
+                .filter(job=job, seeker=seeker)
+                .order_by("-assigned_at")
+                .first()
+            )
+
+            base = {
                 "label": f"Candidate #{idx}",
-                # keep ID if you ever want a “reveal” feature later;
-                # not used in template now
                 "user_id": seeker.id,
-                # optional matching percentage - static for now or computed if you like
-                "match_percentage": 85,
-            })
+                "match_percentage": 85,  # stub; you can compute a real score later
+                "assignment_id": assignment.id if assignment else None,
+                "has_assignment": assignment is not None,
+                "completed": assignment.completed if assignment else False,
+            }
+
+            if assignment and assignment.completed:
+                interviewed_candidates.append(base)
+            else:
+                open_candidates.append(base)
 
         job_data.append({
             "job": job,
-            "seekers": anonymous_seekers,
+            "candidates": open_candidates,
+            "interviewed_candidates": interviewed_candidates,
         })
 
     return render(request, "JobFinder_app/employer_dashboard.html", {
         "job_data": job_data
     })
 
-
 def seeker_dashboard(request):
-    return render(request, "JobFinder_app/seeker_dashboard.html")
+    assignments = InterviewAssignment.objects.filter(seeker=request.user).order_by("-assigned_at")
+    messages = Message.objects.filter(receiver=request.user).order_by("-created_at")
+
+    return render(request, "JobFinder_app/seeker_dashboard.html", {
+        "assignments": assignments,
+        "messages": messages,
+    })
 
 
 
@@ -386,9 +409,186 @@ def landing_view(request):
 
 
 
-    
-#def report_create_experience(request):
-#    if request.method == 'POST':
-#        form = ExperienceModel(request.POST)
-#        if form.is_valid():
-##            form.instance.user = request.user
+# @login_required
+# def send_interview(request, job_id, seeker_id):
+#     job = get_object_or_404(Job, id=job_id)
+#     seeker = get_object_or_404(User, id=seeker_id)
+
+#     # only the job owner can send interviews
+#     if job.user != request.user:
+#         return redirect("employer_dashboard")
+
+#     if not job.interview_questions:
+#         # nothing to send; you might flash a message later
+#         return redirect("employer_dashboard")
+
+#     # create or reuse an assignment
+#     assignment, created = InterviewAssignment.objects.get_or_create(
+#         job=job,
+#         employer=request.user,
+#         seeker=seeker,
+#         defaults={"questions": job.interview_questions},
+#     )
+#     if not created:
+#         # keep questions in sync if changed
+#         assignment.questions = job.interview_questions
+#         assignment.save()
+
+#     # send a Message into the seeker's inbox
+#     Message.objects.create(
+#         sender=request.user,
+#         receiver=seeker,
+#         subject=f"Interview for {job.title}",
+#         body="You have been invited to complete a video interview for this job.",
+#         job=job,
+#     )
+
+#     return redirect("employer_dashboard")
+
+@login_required
+def send_interview(request, job_id, seeker_id):
+    job = get_object_or_404(Job, id=job_id)
+    seeker = get_object_or_404(User, id=seeker_id)
+
+    # Security: Only job owner can send interviews
+    if job.user != request.user:
+        messages.error(request, "You do not have permission to send an interview for this job.")
+        return redirect("employer_dashboard")
+
+    # Validation: Ensure job has real interview questions
+    if not job.interview_questions.strip() or job.interview_questions.strip() == "No interview questions provided.":
+        messages.error(request, "This job has no interview questions yet.")
+        return redirect("employer_dashboard")
+
+    # Create or reuse existing assignment
+    assignment, created = InterviewAssignment.objects.get_or_create(
+        job=job,
+        employer=request.user,
+        seeker=seeker,
+        defaults={"questions": job.interview_questions},
+    )
+
+    if not created:
+        messages.info(request, "Interview already sent to this candidate.")
+        return redirect("employer_dashboard")
+
+    # Create inbox message for the seeker
+    Message.objects.create(
+        sender=request.user,
+        receiver=seeker,
+        subject=f"Interview for {job.title}",
+        body="You have been invited to complete a video interview.",
+        job=job,
+    )
+
+    messages.success(request, "Interview sent successfully!")
+    return redirect("employer_dashboard")
+    # Create inbox message
+    Message.objects.create(
+        sender=request.user,
+        receiver=seeker,
+        subject=f"Interview for {job.title}",
+        body="You have been invited to complete a video interview.",
+        job=job,
+    )
+
+    print("DEBUG: Message created successfully")
+
+    return redirect("employer_dashboard")
+
+
+@login_required
+def inbox_view(request):
+    user = request.user
+
+    messages_qs = Message.objects.filter(receiver=user).order_by("-created_at")
+
+    # Interviews where this user is the seeker (to answer)
+    assignments_to_answer = InterviewAssignment.objects.filter(
+        seeker=user, completed=False
+    ).order_by("-assigned_at")
+
+    # Interviews completed for jobs this employer owns
+    assignments_for_review = InterviewAssignment.objects.filter(
+        employer=user, completed=True
+    ).order_by("-assigned_at")
+
+    return render(request, "JobFinder_app/inbox.html", {
+        "messages": messages_qs,
+        "assignments_to_answer": assignments_to_answer,
+        "assignments_for_review": assignments_for_review,
+    })
+ 
+@login_required
+@require_http_methods(["GET", "POST"])
+def answer_interview(request, assignment_id):
+    assignment = get_object_or_404(InterviewAssignment, id=assignment_id)
+
+    # only the seeker assigned may answer
+    if assignment.seeker != request.user:
+        return redirect("inbox")
+
+    questions = [q.strip() for q in assignment.questions.splitlines() if q.strip()]
+
+    if request.method == "POST":
+        # clear any existing responses for re-tries, if you want
+        assignment.responses.all().delete()
+
+        for idx, question in enumerate(questions):
+            file_key = f"video_{idx}"
+            video_file = request.FILES.get(file_key)
+            if video_file:
+                InterviewResponse.objects.create(
+                    assignment=assignment,
+                    seeker=request.user,
+                    question=question,
+                    video=video_file,
+                )
+
+        assignment.completed = True
+        assignment.save()
+
+        # notify employer in inbox
+        Message.objects.create(
+            sender=request.user,
+            receiver=assignment.employer,
+            subject=f"Interview Completed for {assignment.job.title}",
+            body="The candidate has completed their video interview.",
+            job=assignment.job,
+        )
+
+        return redirect("inbox")
+
+    return render(request, "JobFinder_app/answer_interview.html", {
+        "assignment": assignment,
+        "questions": questions,
+    })
+
+@login_required
+def hire_from_assignment(request, assignment_id):
+    assignment = get_object_or_404(InterviewAssignment, id=assignment_id)
+
+    if assignment.employer != request.user:
+        return redirect("employer_dashboard")
+
+    assignment.employer_marked_hire = True
+    assignment.save()
+
+    # notify superusers so they can connect them
+    superusers = User.objects.filter(is_superuser=True)
+    for admin in superusers:
+        Message.objects.create(
+            sender=request.user,
+            receiver=admin,
+            subject="Candidate ready to hire",
+            body=(
+                f"Employer {request.user.username} wants to hire "
+                f"{assignment.seeker.username} for job '{assignment.job.title}'."
+            ),
+            job=assignment.job,
+        )
+
+    assignment.superuser_notified = True
+    assignment.save()
+
+    return redirect("employer_dashboard")

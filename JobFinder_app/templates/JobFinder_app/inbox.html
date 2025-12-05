@@ -1,0 +1,68 @@
+{% extends "JobFinder_app/base.html" %}
+{% block title %}Inbox – LiteSpeedJobs{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Inbox</h2>
+
+    <h4 class="mt-4">Messages</h4>
+    {% if messages %}
+        <ul class="list-group mb-4">
+            {% for m in messages %}
+                <li class="list-group-item">
+                    <strong>{{ m.subject }}</strong><br>
+                    <small class="text-muted">
+                        From {{ m.sender.username }} • {{ m.created_at }}
+                    </small>
+                    {% if m.body %}
+                        <p class="mt-2 mb-0">{{ m.body }}</p>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-muted">No messages.</p>
+    {% endif %}
+
+    {% if assignments_to_answer %}
+        <h4 class="mt-4">Interview Requests</h4>
+        <ul class="list-group mb-4">
+            {% for a in assignments_to_answer %}
+                <li class="list-group-item d-flex justify-content-between">
+                    <div>
+                        <strong>{{ a.job.title }}</strong><br>
+                        <small class="text-muted">
+                            From {{ a.employer.username }} • {{ a.assigned_at }}
+                        </small>
+                    </div>
+                    <a href="{% url 'answer_interview' a.id %}"
+                       class="btn btn-sm btn-primary">
+                        Answer Interview
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if assignments_for_review %}
+        <h4 class="mt-4">Completed Interviews (for your jobs)</h4>
+        <ul class="list-group mb-4">
+            {% for a in assignments_for_review %}
+                <li class="list-group-item d-flex justify-content-between">
+                    <div>
+                        <strong>{{ a.job.title }}</strong><br>
+                        <small class="text-muted">
+                            Candidate: {{ a.seeker.username }} • {{ a.assigned_at }}
+                        </small>
+                    </div>
+                    <a href="{% url 'hire_from_assignment' a.id %}"
+                       class="btn btn-sm btn-outline-primary">
+                        Mark as Hire
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+{% endblock %}
+

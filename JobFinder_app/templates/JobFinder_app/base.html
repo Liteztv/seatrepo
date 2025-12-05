@@ -10,7 +10,261 @@
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
+
     <style>
+        /* =========================================
+        LiteSpeedJobs Professional Dark Theme
+        ========================================= */
+        :root {
+            /* LIGHT MODE COLORS */
+            --ls-bg: #ffffff;
+            --ls-bg-card: #f7f9fc;
+            --ls-text: #141414;
+            --ls-text-muted: #555;
+            --ls-border: #e4e7ec;
+
+            /* BRAND COLOR */
+            --ls-primary: #4dabf7;
+
+            /* DARK MODE COLORS */
+            --ls-dark-bg: #0e1116;
+            --ls-dark-bg-card: #1a1d24;
+            --ls-dark-border: #2b2e36;
+            --ls-dark-text: #f1f3f7;
+            --ls-dark-muted: #b7bcc7;
+        }
+
+        /* Smooth mode switching */
+        body {
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        /* ===========================
+        DARK MODE BASE STYLING
+        =========================== */
+        body.dark-mode {
+            background-color: var(--ls-dark-bg);
+            color: var(--ls-dark-text);
+        }
+
+        body.dark-mode h1,
+        body.dark-mode h2,
+        body.dark-mode h3,
+        body.dark-mode h4,
+        body.dark-mode h5 {
+            color: var(--ls-dark-text);
+        }
+
+        body.dark-mode p,
+        body.dark-mode span,
+        body.dark-mode label,
+        body.dark-mode small {
+            color: var(--ls-dark-muted);
+        }
+
+        /* ===========================
+        NAVBAR
+        =========================== */
+        .navbar {
+            transition: background 0.3s ease;
+        }
+
+        body.dark-mode .navbar {
+            background-color: #14171d !important;
+            border-bottom: 1px solid var(--ls-dark-border);
+        }
+
+        /* ===========================
+        CARDS
+        =========================== */
+        .card {
+            transition: background 0.3s ease, border 0.3s ease;
+        }
+
+        body.dark-mode .card {
+            background-color: var(--ls-dark-bg-card) !important;
+            border-color: var(--ls-dark-border) !important;
+        }
+
+        /* ===========================
+        LIST ITEMS
+        =========================== */
+        body.dark-mode .list-group-item {
+            background-color: var(--ls-dark-bg-card) !important;
+            border-color: var(--ls-dark-border) !important;
+            color: var(--ls-dark-text) !important;
+        }
+
+        /* ===========================
+        FORMS + INPUTS
+        =========================== */
+        body.dark-mode .form-control,
+        body.dark-mode textarea,
+        body.dark-mode select,
+        body.dark-mode input {
+            background-color: #1b1e25 !important;
+            border-color: var(--ls-dark-border) !important;
+            color: var(--ls-dark-text) !important;
+        }
+
+        body.dark-mode .form-control:focus {
+            border-color: var(--ls-primary) !important;
+            box-shadow: 0 0 0 0.2rem rgba(77, 171, 247, 0.3) !important;
+        }
+
+        /* ===========================
+        BUTTONS
+        =========================== */
+        .btn {
+            transition: background 0.25s ease, color 0.25s ease, border 0.25s ease;
+        }
+
+        /* Primary */
+        body.dark-mode .btn-primary {
+            background-color: var(--ls-primary) !important;
+            border-color: var(--ls-primary) !important;
+            color: #000 !important;
+        }
+
+        /* Outline primary */
+        body.dark-mode .btn-outline-primary {
+            border-color: var(--ls-primary) !important;
+            color: var(--ls-primary) !important;
+        }
+        body.dark-mode .btn-outline-primary:hover {
+            background-color: var(--ls-primary) !important;
+            color: #000 !important;
+        }
+
+        /* Danger */
+        body.dark-mode .btn-outline-danger {
+            border-color: #ff6b6b !important;
+            color: #ff6b6b !important;
+        }
+        body.dark-mode .btn-outline-danger:hover {
+            background-color: #ff6b6b !important;
+            color: #000 !important;
+        }
+
+        /* ===========================
+        ALERTS
+        =========================== */
+        body.dark-mode .alert {
+            background-color: #1d2027 !important;
+            border-color: var(--ls-dark-border) !important;
+            color: var(--ls-dark-text) !important;
+        }
+
+        /* ===========================
+        TABLES
+        =========================== */
+        body.dark-mode table {
+            color: var(--ls-dark-text) !important;
+        }
+
+        body.dark-mode thead {
+            background-color: #252933 !important;
+        }
+
+        body.dark-mode tbody tr {
+            border-color: var(--ls-dark-border) !important;
+        }
+
+        body.dark-mode tbody tr:hover {
+            background-color: #2a2e38 !important;
+        }
+
+        /* ===========================
+        DARK MODE TOGGLE BUTTON
+        =========================== */
+        #darkModeToggle {
+            font-size: 0.9rem;
+            border-radius: 25px;
+            padding: 5px 14px;
+            cursor: pointer;
+        }
+
+        body.dark-mode #darkModeToggle {
+            background-color: var(--ls-primary) !important;
+            color: #000 !important;
+            border-color: var(--ls-primary) !important;
+        }
+        </style>
+
+        <!-- <style>
+        :root {
+            --ls-bg-dark: #0f1217;
+            --ls-bg-card: #1c1f26;
+            --ls-text-light: #f2f5f8;
+            --ls-text-muted: #c3c7cf;
+            --ls-primary: #4dabf7;
+            --ls-border: #2c2f36;
+        }
+
+        body.dark-mode {
+            background-color: var(--ls-bg-dark);
+            color: var(--ls-text-light);
+        }
+
+        body.dark-mode .card {
+            background-color: var(--ls-bg-card) !important;
+            color: var(--ls-text-light) !important;
+            border-color: var(--ls-border) !important;
+        }
+
+        body.dark-mode .list-group-item {
+            background-color: var(--ls-bg-card) !important;
+            border-color: var(--ls-border) !important;
+            color: var(--ls-text-light) !important;
+        }
+
+        body.dark-mode h1, 
+        body.dark-mode h2, 
+        body.dark-mode h3, 
+        body.dark-mode h4, 
+        body.dark-mode h5 {
+            color: var(--ls-text-light) !important;
+        }
+
+        body.dark-mode p, 
+        body.dark-mode span,
+        body.dark-mode label {
+            color: var(--ls-text-muted) !important;
+        }
+
+        body.dark-mode .navbar,
+        body.dark-mode .navbar-dark {
+            background-color: #14171c !important;
+        }
+
+        body.dark-mode .btn-primary {
+            background-color: var(--ls-primary) !important;
+            border-color: var(--ls-primary) !important;
+            color: #000 !important;
+        }
+
+        body.dark-mode .btn-outline-primary {
+            border-color: var(--ls-primary) !important;
+            color: var(--ls-primary) !important;
+        }
+
+        body.dark-mode .form-control,
+        body.dark-mode input,
+        body.dark-mode textarea,
+        body.dark-mode select {
+            background-color: #1a1d23 !important;
+            color: var(--ls-text-light) !important;
+            border-color: var(--ls-border) !important;
+        }
+
+        body.dark-mode .alert {
+            background-color: #1f2229 !important;
+            border-color: var(--ls-border) !important;
+            color: var(--ls-text-light) !important;
+        }
+    
+
+    
         :root {
             --bg-color: #ffffff;
             --text-color: #000000;
@@ -38,8 +292,24 @@
         .navbar-dark-mode {
             cursor: pointer;
         }
-    </style>
+    </style> -->
 </head>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const toggle = document.getElementById("darkModeToggle");
+    const body = document.body;
+
+    // Load stored preference
+    if (localStorage.getItem("ls-dark-mode") === "true") {
+        body.classList.add("dark-mode");
+    }
+
+    toggle.addEventListener("click", () => {
+        body.classList.toggle("dark-mode");
+        localStorage.setItem("ls-dark-mode", body.classList.contains("dark-mode"));
+    });
+});
+</script>
 
 <body>
 
@@ -50,10 +320,16 @@
     <div class="ms-auto d-flex align-items-center">
 
         <!-- Dark Mode Toggle -->
-        <span class="navbar-dark-mode me-3 text-white">
-            <i class="bi bi-moon-stars-fill"></i>
-        </span>
+        <button id="darkModeToggle" class="btn btn-outline-light ms-3">
+            🌙 Dark Mode
+        </button>
 
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'inbox' %}">&nbsp;
+                <i class="bi bi-envelope"></i> Inbox&nbsp;&nbsp;&nbsp;&nbsp;
+            </a>
+        </li>
+        <hr>
         {% if request.user.is_authenticated %}
             <span class="text-white me-3">
                 Logged in as <strong>{{ request.user.username }}</strong>
@@ -67,7 +343,15 @@
 <div class="container py-4">
     {% block content %}{% endblock %}
 </div>
-
+{% if messages %}
+<div class="container mt-3">
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} mb-2">
+            {{ message }}
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
