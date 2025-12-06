@@ -1,68 +1,70 @@
 {% extends "JobFinder_app/base.html" %}
-{% block title %}Inbox – LiteSpeedJobs{% endblock %}
+{% load message_tags %}
+{% block title %}Inbox - LiteSpeedJobs{% endblock %}
 
 {% block content %}
+<style>
+    .message-card {
+        transition: background 0.2s ease, border 0.2s ease;
+        cursor: pointer;
+    }
+    .message-card:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    body.dark-mode .message-card:hover {
+        background-color: rgba(255, 255, 255, 0.06);
+    }
+    .unread-dot {
+        width: 10px;
+        height: 10px;
+        background: #4dabf7;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 8px;
+    }
+</style>
+{% load message_tags %}
 <div class="container mt-4">
-    <h2>Inbox</h2>
+    <h2 class="mb-4">
+        Inbox
+        {% if unread_count > 0 %}
+            <span class="badge bg-primary">{{ unread_count }} new</span>
+        {% endif %}
+    </h2>
 
-    <h4 class="mt-4">Messages</h4>
     {% if messages %}
-        <ul class="list-group mb-4">
+        <div class="list-group shadow-sm">
             {% for m in messages %}
-                <li class="list-group-item">
-                    <strong>{{ m.subject }}</strong><br>
-                    <small class="text-muted">
-                        From {{ m.sender.username }} • {{ m.created_at }}
-                    </small>
-                    {% if m.body %}
-                        <p class="mt-2 mb-0">{{ m.body }}</p>
-                    {% endif %}
-                </li>
+                <a href="{% url 'view_message' m.id %}" 
+                   class="list-group-item list-group-item-action message-card d-flex justify-content-between">
+
+                    <div>
+                        {% if not m.is_read %}
+                            <span class="unread-dot"></span>
+                        {% endif %}
+
+                        <strong>{{ m.subject }}</strong><br>
+                        <small class="text-muted">
+                            From: {{ m.sender.username }} • {{ m.created_at|date:"M d, Y h:i A" }}
+                        </small>
+                    </div>
+
+                    <div class="text-muted small">
+                        {% if m.body %}
+                            {{ m.body|truncatechars:40 }}
+                        {% else %}
+                            (No message body)
+                        {% endif %}
+                    </div>
+                </a>
             {% endfor %}
-        </ul>
+        </div>
+
     {% else %}
-        <p class="text-muted">No messages.</p>
-    {% endif %}
-
-    {% if assignments_to_answer %}
-        <h4 class="mt-4">Interview Requests</h4>
-        <ul class="list-group mb-4">
-            {% for a in assignments_to_answer %}
-                <li class="list-group-item d-flex justify-content-between">
-                    <div>
-                        <strong>{{ a.job.title }}</strong><br>
-                        <small class="text-muted">
-                            From {{ a.employer.username }} • {{ a.assigned_at }}
-                        </small>
-                    </div>
-                    <a href="{% url 'answer_interview' a.id %}"
-                       class="btn btn-sm btn-primary">
-                        Answer Interview
-                    </a>
-                </li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-
-    {% if assignments_for_review %}
-        <h4 class="mt-4">Completed Interviews (for your jobs)</h4>
-        <ul class="list-group mb-4">
-            {% for a in assignments_for_review %}
-                <li class="list-group-item d-flex justify-content-between">
-                    <div>
-                        <strong>{{ a.job.title }}</strong><br>
-                        <small class="text-muted">
-                            Candidate: {{ a.seeker.username }} • {{ a.assigned_at }}
-                        </small>
-                    </div>
-                    <a href="{% url 'hire_from_assignment' a.id %}"
-                       class="btn btn-sm btn-outline-primary">
-                        Mark as Hire
-                    </a>
-                </li>
-            {% endfor %}
-        </ul>
+        <div class="alert alert-info">You have no messages yet.</div>
     {% endif %}
 </div>
+
 {% endblock %}
+
 

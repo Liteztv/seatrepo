@@ -1,0 +1,31 @@
+{% extends "JobFinder_app/base.html" %}
+{% block title %}Message - LiteSpeedJobs{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <a href="{% url 'inbox' %}" class="btn btn-outline-secondary mb-3">
+        ← Back to Inbox
+    </a>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <h3>{{ msg.subject }}</h3>
+            <p class="text-muted">
+                From {{ msg.sender.username }} • {{ msg.created_at|date:"M d, Y h:i A" }}
+            </p>
+
+            <hr>
+
+            <p>{{ msg.body|linebreaks }}</p>
+
+            {% if msg.job %}
+                <hr>
+                <p class="text-muted">Regarding Job: <strong>{{ msg.job.title }}</strong></p>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}

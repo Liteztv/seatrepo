@@ -11,9 +11,18 @@ from .forms import ( SeekerFormOne, SeekerFormTwo, SeekerFormThree, Registration
 # from django.urls import reverse
 from .models import ( SeekerModelOne, SeekerModelThree, SeekerModelTwo, Profile, 
                      Job, JobRequirementOne, JobRequirementTwo, JobRequirementThree,
-                     InterviewAssignment, InterviewResponse, Message,
+                     InterviewAssignment, InterviewResponse, Message, Conversation
                      )
 
+def get_or_create_conversation(user1, user2):
+    convo = Conversation.objects.filter(
+        Q(user1=user1, user2=user2) | Q(user1=user2, user2=user1)
+    ).first()
+
+    if convo:
+        return convo
+
+    return Conversation.objects.create(user1=user1, user2=user2)
 
 def edit_job(request, job_id):
     job = get_object_or_404(Job, id=job_id)
@@ -152,17 +161,6 @@ def match_seekers_for_job(job):
 
     return User.objects.filter(id__in=ids)
 
-# def employer_dashboard(request):
-#     employer_user = request.user
-#     matches = match_seekers(employer_user)
-
-#     seekers = User.objects.filter(id__in=matches)
-
-#     return render(request, "JobFinder_app/employer_dashboard.html", {
-#         "seekers": seekers
-#     })
-
-
 
 def employer_dashboard(request):
     jobs = Job.objects.filter(user=request.user).order_by("-created_at")
@@ -216,11 +214,6 @@ def seeker_dashboard(request):
         "messages": messages,
     })
 
-
-
-#def base_view(request):
-    #return render(request,'/base.html')
-
 def home_view(request):
     return render(request,'JobFinder_app/home.html')
 
@@ -258,45 +251,6 @@ def seekerthree_view(request):
         form = SeekerFormThree()
         return render(request,'JobFinder_app/seekerexthree.html',context={'form': form})
     
-# def employerone_view(request):
-#     if request.method == 'POST':
-#         form = EmployerFormOne(request.POST)
-#         if form.is_valid():
-#             form.save(form.cleaned_data)
-#             return redirect('employerviewtwo')
-    
-#     else:
-#         form = EmployerFormOne()
-#         return render(request,'JobFinder_app/employerexone.html',context={'form': form})
-        
-
-# def employertwo_view(request):
-#     if request.method == 'POST':
-#         form = EmployerFormTwo(request.POST)   
-#         if form.is_valid():
-#             form.save(form.cleaned_data)
-#             return redirect('employerviewthree')
-        
-#     else:
-#         form = EmployerFormTwo()
-#         return render(request,'JobFinder_app/employerextwo.html',context={'form': form})
-    
-
-# def employerthree_view(request):
-#     if request.method == 'POST':
-#         form = EmployerFormThree(request.POST)
-#         if form.is_valid():
-#             form.save(form.cleaned_data)
-#             return render(request,'JobFinder_app/thanks.html')
-        
-#     else:
-#         form = EmployerFormThree()
-#         return render(request,'JobFinder_app/employerexthree.html',context={'form': form})
-        
-
-
-
-
 def thanks_view(request):
     return render(request,'JobFinder_app/thanks.html')
 
@@ -330,7 +284,6 @@ def login_view(request):
         form = LoginForm()
 
     return render(request, "JobFinder_app/login.html", {"form": form})
-
 
 
 def register_view(request):
@@ -409,41 +362,7 @@ def landing_view(request):
 
 
 
-# @login_required
-# def send_interview(request, job_id, seeker_id):
-#     job = get_object_or_404(Job, id=job_id)
-#     seeker = get_object_or_404(User, id=seeker_id)
 
-#     # only the job owner can send interviews
-#     if job.user != request.user:
-#         return redirect("employer_dashboard")
-
-#     if not job.interview_questions:
-#         # nothing to send; you might flash a message later
-#         return redirect("employer_dashboard")
-
-#     # create or reuse an assignment
-#     assignment, created = InterviewAssignment.objects.get_or_create(
-#         job=job,
-#         employer=request.user,
-#         seeker=seeker,
-#         defaults={"questions": job.interview_questions},
-#     )
-#     if not created:
-#         # keep questions in sync if changed
-#         assignment.questions = job.interview_questions
-#         assignment.save()
-
-#     # send a Message into the seeker's inbox
-#     Message.objects.create(
-#         sender=request.user,
-#         receiver=seeker,
-#         subject=f"Interview for {job.title}",
-#         body="You have been invited to complete a video interview for this job.",
-#         job=job,
-#     )
-
-#     return redirect("employer_dashboard")
 
 @login_required
 def send_interview(request, job_id, seeker_id):
@@ -472,10 +391,14 @@ def send_interview(request, job_id, seeker_id):
         messages.info(request, "Interview already sent to this candidate.")
         return redirect("employer_dashboard")
 
-    # Create inbox message for the seeker
+    # ✅ Create or find the conversation
+    convo = get_or_create_conversation(request.user, seeker)
+
+    # ✅ Create inbox message tied to conversation
     Message.objects.create(
         sender=request.user,
         receiver=seeker,
+        conversation=convo,
         subject=f"Interview for {job.title}",
         body="You have been invited to complete a video interview.",
         job=job,
@@ -483,21 +406,10 @@ def send_interview(request, job_id, seeker_id):
 
     messages.success(request, "Interview sent successfully!")
     return redirect("employer_dashboard")
-    # Create inbox message
-    Message.objects.create(
-        sender=request.user,
-        receiver=seeker,
-        subject=f"Interview for {job.title}",
-        body="You have been invited to complete a video interview.",
-        job=job,
-    )
-
-    print("DEBUG: Message created successfully")
-
-    return redirect("employer_dashboard")
 
 
-@login_required
+
+@login_required(login_url="login")
 def inbox_view(request):
     user = request.user
 
@@ -517,8 +429,23 @@ def inbox_view(request):
         "messages": messages_qs,
         "assignments_to_answer": assignments_to_answer,
         "assignments_for_review": assignments_for_review,
+        "unread_count": messages.filter(is_read=False).count(),
     })
  
+@login_required(login_url="login")
+def view_message(request, message_id):
+    msg = get_object_or_404(Message, id=message_id, receiver=request.user)
+
+    # Mark as read
+    if not msg.is_read:
+        msg.is_read = True
+        msg.save()
+
+    return render(request, "JobFinder_app/message_detail.html", {
+        "msg": msg
+    })
+
+
 @login_required
 @require_http_methods(["GET", "POST"])
 def answer_interview(request, assignment_id):
@@ -592,3 +519,141 @@ def hire_from_assignment(request, assignment_id):
     assignment.save()
 
     return redirect("employer_dashboard")
+
+@login_required(login_url="login")
+def inbox_pro(request):
+    # Get all conversations where the user is a participant
+    conversations = Conversation.objects.filter(
+        Q(user1=request.user) | Q(user2=request.user)
+    ).distinct()
+
+    active_conversation = None
+
+    # If "conversation_id" is provided, load that conversation
+    convo_id = request.GET.get("c")
+    if convo_id:
+        active_conversation = get_object_or_404(
+            Conversation,
+            
+            # Make sure the user is part of it
+            Q(user1=request.user) | Q(user2=request.user),
+            id=convo_id
+        )
+
+    return render(request, "JobFinder_app/inbox_pro.html", {
+        "conversations": conversations,
+        "active_conversation": active_conversation,
+    })
+
+
+@login_required
+def conversation_view(request, convo_id):
+    convo = get_object_or_404(Conversation, id=convo_id)
+
+    # permission check
+    if request.user not in (convo.user1, convo.user2):
+        return redirect("inbox_pro")
+
+    if request.method == "POST":
+        msg = request.POST.get("message")
+        if msg.strip():
+            Message.objects.create(
+                conversation=convo,
+                sender=request.user,
+                body=msg
+            )
+
+    return render(request, "JobFinder_app/inbox_pro.html", {
+        "conversations": Conversation.objects.filter(
+            user1=request.user
+        ) | Conversation.objects.filter(
+            user2=request.user
+        ),
+        "active_conversation": convo
+    })
+
+#def base_view(request):
+    #return render(request,'/base.html')
+
+
+
+# @login_required
+# def send_interview(request, job_id, seeker_id):
+#     job = get_object_or_404(Job, id=job_id)
+#     seeker = get_object_or_404(User, id=seeker_id)
+
+#     # only the job owner can send interviews
+#     if job.user != request.user:
+#         return redirect("employer_dashboard")
+
+#     if not job.interview_questions:
+#         # nothing to send; you might flash a message later
+#         return redirect("employer_dashboard")
+
+#     # create or reuse an assignment
+#     assignment, created = InterviewAssignment.objects.get_or_create(
+#         job=job,
+#         employer=request.user,
+#         seeker=seeker,
+#         defaults={"questions": job.interview_questions},
+#     )
+#     if not created:
+#         # keep questions in sync if changed
+#         assignment.questions = job.interview_questions
+#         assignment.save()
+
+#     # send a Message into the seeker's inbox
+#     Message.objects.create(
+#         sender=request.user,
+#         receiver=seeker,
+#         subject=f"Interview for {job.title}",
+#         body="You have been invited to complete a video interview for this job.",
+#         job=job,
+#     )
+
+#     return redirect("employer_dashboard")
+
+# def employerone_view(request):
+#     if request.method == 'POST':
+#         form = EmployerFormOne(request.POST)
+#         if form.is_valid():
+#             form.save(form.cleaned_data)
+#             return redirect('employerviewtwo')
+    
+#     else:
+#         form = EmployerFormOne()
+#         return render(request,'JobFinder_app/employerexone.html',context={'form': form})
+        
+
+# def employertwo_view(request):
+#     if request.method == 'POST':
+#         form = EmployerFormTwo(request.POST)   
+#         if form.is_valid():
+#             form.save(form.cleaned_data)
+#             return redirect('employerviewthree')
+        
+#     else:
+#         form = EmployerFormTwo()
+#         return render(request,'JobFinder_app/employerextwo.html',context={'form': form})
+    
+
+# def employerthree_view(request):
+#     if request.method == 'POST':
+#         form = EmployerFormThree(request.POST)
+#         if form.is_valid():
+#             form.save(form.cleaned_data)
+#             return render(request,'JobFinder_app/thanks.html')
+        
+#     else:
+#         form = EmployerFormThree()
+#         return render(request,'JobFinder_app/employerexthree.html',context={'form': form})
+
+# def employer_dashboard(request):
+#     employer_user = request.user
+#     matches = match_seekers(employer_user)
+
+#     seekers = User.objects.filter(id__in=matches)
+
+#     return render(request, "JobFinder_app/employer_dashboard.html", {
+#         "seekers": seekers
+#     })
