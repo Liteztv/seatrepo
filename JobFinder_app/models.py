@@ -228,3 +228,10 @@ class Conversation(models.Model):
     def get_other_user(self, me):
         return self.user2 if me == self.user1 else self.user1
   
+class SeekerResume(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    resume = models.FileField(upload_to="resumes/")
+    uploaded_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Resume – {self.user.username}"

@@ -24,6 +24,8 @@
             --ls-text-muted: #555;
             --ls-border: #e4e7ec;
 
+            --ls-icon-color: #f1f3f5;
+
             /* BRAND COLOR */
             --ls-primary: #4dabf7;
 
@@ -44,8 +46,10 @@
         DARK MODE BASE STYLING
         =========================== */
         body.dark-mode {
+            
             background-color: var(--ls-dark-bg);
             color: var(--ls-dark-text);
+            
         }
 
         body.dark-mode h1,
@@ -67,6 +71,7 @@
         NAVBAR
         =========================== */
         .navbar {
+            
             transition: background 0.3s ease;
         }
 
@@ -145,6 +150,35 @@
         body.dark-mode .btn-outline-danger:hover {
             background-color: #ff6b6b !important;
             color: #000 !important;
+        }
+
+        .navbar .nav-link i,
+        .navbar .inbox-icon {
+            color: var(--ls-icon-color) !important;
+            transition: color 0.2s ease;
+        }
+
+        .user-link .nav-icon,
+        .user-link span {
+            color: var(--ls-icon-color);
+            transition: color 0.2s ease;
+            font-weight: 500;
+        }
+
+        .user-link:hover .nav-icon,
+        .user-link:hover span {
+            color: var(--ls-primary);
+            text-decoration: none;
+        }
+
+        .home-link,
+        .home-link i {
+            color: #ffffff !important;
+        }
+
+        .home-link:hover,
+        .home-link:hover i {
+            color: #ffffff !important;
         }
 
         /* ===========================
@@ -327,18 +361,23 @@ document.addEventListener("DOMContentLoaded", function () {
         </button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
         
-
-        {% if user.is_authenticated %}
+        <li class="nav-item">
+            <a class="nav-link d-flex align-items-center home-link"
+            href="{% url 'landing' %}">
+                <i class="bi bi-house-door-fill me-1 nav-icon"></i>
+                <span class="d-none d-md-inline">Home</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            </a>
+        </li>
+        {% if user.is_authenticated %}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        
         <li class="nav-item position-relative">
             <a href="{% url 'inbox_pro' %}" class="nav-link">
                 <i class="bi bi-inbox"></i>
 
-                {% unread_messages user as unread %}
-                {% if unread > 0 %}
-                    <span class="badge bg-danger position-absolute top-0 start-100 translate-middle">
-                        {{ unread }}
-                    </span>
+                {% if unread_count > 0 %}
+                    <span class="badge bg-danger">{{ unread_count }}</span>
                 {% endif %}
+
             </a>
         </li>
         {% else %}
@@ -351,8 +390,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         <hr>
         {% if request.user.is_authenticated %}
-            <span class="text-white me-3">
-                Logged in as <strong>{{ request.user.username }}</strong>
+            <a href="{% url 'role_redirect' %}"
+                class="nav-link d-flex align-items-center gap-1 user-link">
+
+                <i class="bi bi-person-circle nav-icon fs-5"></i>
+             <span class="d-none d-md-inline">
+                 <strong>Logged in as {{ request.user.username }}</strong>
             </span>
             <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">Logout</a>
         {% endif %}

@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.utils.safestring import mark_safe
 from django.forms import ModelForm
-from .models import ( SeekerModelOne, SeekerModelTwo, SeekerModelThree, Profile, Job, JobRequirementOne, JobRequirementTwo, JobRequirementThree,
+from .models import ( SeekerModelOne, SeekerModelTwo, SeekerModelThree, Profile, Job, JobRequirementOne, JobRequirementTwo, JobRequirementThree, SeekerResume
                      
                       )
 
@@ -79,6 +79,10 @@ class JobRequirementThreeForm(forms.ModelForm):
         model = JobRequirementThree
         exclude = ("job",)
 
+class ResumeUploadForm(forms.ModelForm):
+    class Meta:
+        model = SeekerResume
+        fields = ["resume"]
 
 
 

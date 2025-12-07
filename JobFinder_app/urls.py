@@ -12,6 +12,7 @@ urlpatterns = [
     path("inbox/", views.inbox_view, name="inbox"),
     path("job/<int:job_id>/send-interview/<int:seeker_id>/", views.send_interview, name="send_interview"),
     path("interview/<int:assignment_id>/answer/", views.answer_interview, name="answer_interview"),
+    path("interview/<int:assignment_id>/review/", views.review_interview, name="review_interview"),
     path("message/<int:message_id>/", views.view_message, name="view_message"),
     path("interview/<int:assignment_id>/hire/", views.hire_from_assignment, name="hire_from_assignment"),
     path("messages/", views.inbox_pro, name="inbox_pro"),
@@ -23,6 +24,7 @@ urlpatterns = [
     path("employer_dashboard/", views.employer_dashboard, name="employer_dashboard"),
     path("seeker_dashboard/", views.seeker_dashboard, name="seeker_dashboard"),
     path("create_job/", views.create_job, name="create_job"),
+    path("upload_resume", views.upload_resume, name="upload_resume"),
 
 
     # Seeker Forms

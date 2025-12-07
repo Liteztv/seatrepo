@@ -118,7 +118,7 @@
                 {% for msg in active_conversation.messages.all %}
                     <div class="message-bubble {% if msg.sender == request.user %}sent{% else %}received{% endif %}">
                         {% if msg.body %}
-                            <div>{{ msg.body|linebreaks }}</div>
+                            <div>{{ msg.body|urlize|linebreaks }}</div>
                         {% endif %}
 
                         {% if msg.attachment %}

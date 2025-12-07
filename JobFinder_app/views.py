@@ -7,12 +7,12 @@ from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from .forms import ( SeekerFormOne, SeekerFormTwo, SeekerFormThree, RegistrationForm, LoginForm,
-                    JobForm, JobRequirementOneForm, JobRequirementTwoForm, JobRequirementThreeForm,
+                    JobForm, JobRequirementOneForm, JobRequirementTwoForm, JobRequirementThreeForm, ResumeUploadForm,
                     )
 # from django.urls import reverse
 from .models import ( SeekerModelOne, SeekerModelThree, SeekerModelTwo, Profile, 
                      Job, JobRequirementOne, JobRequirementTwo, JobRequirementThree,
-                     InterviewAssignment, InterviewResponse, Message, Conversation
+                     InterviewAssignment, InterviewResponse, Message, Conversation, SeekerResume,
                      )
 
 from django.db import transaction
@@ -339,34 +339,59 @@ def logout_view(request):
     logout(request)
     return redirect("login")
 
+@login_required
 def seeker_form_one(request):
-    form = SeekerFormOne(request.POST or None)
-    if request.method == "POST" and form.is_valid():
-        instance = form.save(commit=False)
-        instance.user = request.user
-        instance.save()
-        return redirect("seeker_form2")
-    return render(request, "JobFinder_app/seeker_form1.html", {"form": form})
+    instance, _ = SeekerModelOne.objects.get_or_create(user=request.user)
+
+    if request.method == "POST":
+        form = SeekerFormOne(request.POST, instance=instance)
+        if form.is_valid():
+            form.save()
+            return redirect("seeker_form2")
+    else:
+        form = SeekerFormOne(instance=instance)
+
+    return render(request, "JobFinder_app/seeker_form1.html", {
+        "form": form,
+        "edit_mode": True,
+    })
 
 
+@login_required
 def seeker_form_two(request):
-    form = SeekerFormTwo(request.POST or None)
-    if request.method == "POST" and form.is_valid():
-        instance = form.save(commit=False)
-        instance.user = request.user
-        instance.save()
-        return redirect("seeker_form3")
-    return render(request, "JobFinder_app/seeker_form2.html", {"form": form})
+    instance, _ = SeekerModelTwo.objects.get_or_create(user=request.user)
+
+    if request.method == "POST":
+        form = SeekerFormTwo(request.POST, instance=instance)
+        if form.is_valid():
+            form.save()
+            return redirect("seeker_form3")
+    else:
+        form = SeekerFormTwo(instance=instance)
+
+    return render(request, "JobFinder_app/seeker_form2.html", {
+        "form": form,
+        "edit_mode": True,
+    })
 
 
+
+@login_required
 def seeker_form_three(request):
-    form = SeekerFormThree(request.POST or None)
-    if request.method == "POST" and form.is_valid():
-        instance = form.save(commit=False)
-        instance.user = request.user
-        instance.save()
-        return redirect("seeker_dashboard")
-    return render(request, "JobFinder_app/seeker_form3.html", {"form": form})
+    instance, _ = SeekerModelThree.objects.get_or_create(user=request.user)
+
+    if request.method == "POST":
+        form = SeekerFormThree(request.POST, instance=instance)
+        if form.is_valid():
+            form.save()
+            return redirect("seeker_dashboard")
+    else:
+        form = SeekerFormThree(instance=instance)
+
+    return render(request, "JobFinder_app/seeker_form3.html", {
+        "form": form,
+        "edit_mode": True,
+    })
 
 
 
@@ -473,7 +498,7 @@ def answer_interview(request, assignment_id):
 
     # only the seeker assigned may answer
     if assignment.seeker != request.user:
-        return redirect("inbox")
+        return redirect("inbox_pro")
 
     questions = [q.strip() for q in assignment.questions.splitlines() if q.strip()]
 
@@ -504,7 +529,7 @@ def answer_interview(request, assignment_id):
             job=assignment.job,
         )
 
-        return redirect("inbox")
+        return redirect("inbox_pro")
 
     return render(request, "JobFinder_app/answer_interview.html", {
         "assignment": assignment,
@@ -538,33 +563,64 @@ def hire_from_assignment(request, assignment_id):
     assignment.superuser_notified = True
     assignment.save()
 
+    messages.success(request, "Candidate marked for hire.")
     return redirect("employer_dashboard")
 
-@login_required(login_url="login")
+# @login_required(login_url="login")
+# def inbox_pro(request):
+#     # Get all conversations where the user is a participant
+#     conversations = Conversation.objects.filter(
+#         Q(user1=request.user) | Q(user2=request.user)
+#     ).distinct()
+
+#     active_conversation = None
+
+#     # If "conversation_id" is provided, load that conversation
+#     convo_id = request.GET.get("c")
+#     if convo_id:
+#         active_conversation = get_object_or_404(
+#             Conversation,
+            
+#             # Make sure the user is part of it
+#             Q(user1=request.user) | Q(user2=request.user),
+#             id=convo_id
+#         )
+
+#     return render(request, "JobFinder_app/inbox_pro.html", {
+#         "conversations": conversations,
+#         "active_conversation": active_conversation,
+#     })
+@login_required
 def inbox_pro(request):
-    # Get all conversations where the user is a participant
+    unread_count = Message.objects.filter(
+        receiver=request.user,
+        is_read=False
+    ).count()
+
     conversations = Conversation.objects.filter(
         Q(user1=request.user) | Q(user2=request.user)
-    ).distinct()
+    ).order_by("-created_at")
 
+    convo_id = request.GET.get("c")
     active_conversation = None
 
-    # If "conversation_id" is provided, load that conversation
-    convo_id = request.GET.get("c")
     if convo_id:
         active_conversation = get_object_or_404(
-            Conversation,
-            
-            # Make sure the user is part of it
-            Q(user1=request.user) | Q(user2=request.user),
-            id=convo_id
+            conversations, id=convo_id
         )
+
+        # ✅ MARK MESSAGES AS READ
+        Message.objects.filter(
+            conversation=active_conversation,
+            receiver=request.user,
+            is_read=False
+        ).update(is_read=True)
 
     return render(request, "JobFinder_app/inbox_pro.html", {
         "conversations": conversations,
         "active_conversation": active_conversation,
+        "unread_count": unread_count,
     })
-
 
 @login_required
 def conversation_view(request, convo_id):
@@ -591,6 +647,38 @@ def conversation_view(request, convo_id):
         ),
         "active_conversation": convo
     })
+
+@login_required
+def review_interview(request, assignment_id):
+    assignment = get_object_or_404(InterviewAssignment, id=assignment_id)
+
+    # Security: only the employer who sent it can view
+    if assignment.employer != request.user:
+        return redirect("employer_dashboard")
+
+    responses = assignment.responses.all().order_by("id")
+
+    return render(request, "JobFinder_app/review_interview.html", {
+        "assignment": assignment,
+        "responses": responses,
+    })
+
+@login_required
+def upload_resume(request):
+    instance, _ = SeekerResume.objects.get_or_create(user=request.user)
+
+    if request.method == "POST":
+        form = ResumeUploadForm(request.POST, request.FILES, instance=instance)
+        if form.is_valid():
+            form.save()
+            return redirect("seeker_dashboard")
+    else:
+        form = ResumeUploadForm(instance=instance)
+
+    return render(request, "JobFinder_app/upload_resume.html", {
+        "form": form
+    })
+
 
 #def base_view(request):
     #return render(request,'/base.html')

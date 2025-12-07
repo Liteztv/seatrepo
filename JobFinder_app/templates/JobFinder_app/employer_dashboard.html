@@ -99,6 +99,10 @@
                                         <strong>{{ seeker.label }}</strong><br>
                                         <small class="text-muted">Interview completed</small>
                                     </div>
+                                    <div><a href="{% url 'review_interview' seeker.assignment_id %}"
+                                            class="btn btn-sm btn-outline-primary">
+                                            Review Interview
+                                            </a></div>
                                     <div class="d-flex align-items-center">
                                         <a href="{% url 'hire_from_assignment' seeker.assignment_id %}"
                                            class="btn btn-sm btn-outline-primary me-2">
