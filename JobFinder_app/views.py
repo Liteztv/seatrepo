@@ -1,3 +1,4 @@
+from django.urls import reverse
 from django.contrib import messages
 from django.shortcuts import render,redirect, get_object_or_404
 from django.db.models import Q
@@ -14,15 +15,27 @@ from .models import ( SeekerModelOne, SeekerModelThree, SeekerModelTwo, Profile,
                      InterviewAssignment, InterviewResponse, Message, Conversation
                      )
 
-def get_or_create_conversation(user1, user2):
+from django.db import transaction
+
+def get_or_create_conversation(user1, user2, job=None):
     convo = Conversation.objects.filter(
-        Q(user1=user1, user2=user2) | Q(user1=user2, user2=user1)
+        Q(user1=user1, user2=user2) |
+        Q(user1=user2, user2=user1)
     ).first()
 
     if convo:
         return convo
 
-    return Conversation.objects.create(user1=user1, user2=user2)
+    with transaction.atomic():
+        convo = Conversation.objects.create(
+            user1=user1,
+            user2=user2,
+            job=job
+        )
+        print("✅ Conversation CREATED:", convo.id)
+
+    return convo
+
 
 def edit_job(request, job_id):
     job = get_object_or_404(Job, id=job_id)
@@ -369,17 +382,27 @@ def send_interview(request, job_id, seeker_id):
     job = get_object_or_404(Job, id=job_id)
     seeker = get_object_or_404(User, id=seeker_id)
 
-    # Security: Only job owner can send interviews
     if job.user != request.user:
-        messages.error(request, "You do not have permission to send an interview for this job.")
+        messages.error(request, "Not authorized.")
         return redirect("employer_dashboard")
 
-    # Validation: Ensure job has real interview questions
-    if not job.interview_questions.strip() or job.interview_questions.strip() == "No interview questions provided.":
-        messages.error(request, "This job has no interview questions yet.")
+    if not job.interview_questions:
+        messages.error(request, "No interview questions.")
         return redirect("employer_dashboard")
 
-    # Create or reuse existing assignment
+    # ✅ Get or create conversation
+    conversation = Conversation.objects.filter(
+        Q(user1=request.user, user2=seeker) |
+        Q(user1=seeker, user2=request.user)
+    ).first()
+
+    if not conversation:
+        conversation = Conversation.objects.create(
+            user1=request.user,
+            user2=seeker,
+            job=job,
+        )
+
     assignment, created = InterviewAssignment.objects.get_or_create(
         job=job,
         employer=request.user,
@@ -387,26 +410,23 @@ def send_interview(request, job_id, seeker_id):
         defaults={"questions": job.interview_questions},
     )
 
-    if not created:
-        messages.info(request, "Interview already sent to this candidate.")
-        return redirect("employer_dashboard")
+    interview_link = request.build_absolute_uri(
+        reverse("answer_interview", args=[assignment.id])
+    )
 
-    # ✅ Create or find the conversation
-    convo = get_or_create_conversation(request.user, seeker)
-
-    # ✅ Create inbox message tied to conversation
+    # ✅ Message MUST link to conversation
     Message.objects.create(
+        conversation=conversation,
         sender=request.user,
         receiver=seeker,
-        conversation=convo,
         subject=f"Interview for {job.title}",
-        body="You have been invited to complete a video interview.",
+        body=f"You have been invited to complete a video interview.\n\n"
+            f"Click here to begin:\n{interview_link}l",
         job=job,
     )
 
-    messages.success(request, "Interview sent successfully!")
+    messages.success(request, "Interview sent.")
     return redirect("employer_dashboard")
-
 
 
 @login_required(login_url="login")
