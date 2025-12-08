@@ -73,15 +73,16 @@
                                         <span class="badge bg-info text-dark me-2">
                                             {{ seeker.match_percentage }}%
                                         </span>
-                                        {% if seeker.resume %}
-                                            <a href="{{ seeker.resume.resume.url }}"
+                                        {% if seeker.resume_file %}
+                                            <a href="{{ seeker.resume_file.url }}"
                                             class="btn btn-sm btn-outline-secondary"
                                             target="_blank">
                                                 View Resume
                                             </a>
                                         {% else %}
-                                            <span class="dark-muted">No resume</span>
+                                            <span class="text-muted">No resume uploaded</span>
                                         {% endif %}
+
 
                                         {% if seeker.has_assignment %}
                                             <span class="badge bg-secondary">Interview Sent</span>

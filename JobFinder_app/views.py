@@ -184,7 +184,7 @@ def employer_dashboard(request):
 
         open_candidates = []
         interviewed_candidates = []
-        resume = []
+        
 
         for idx, seeker in enumerate(seekers_qs, start=1):
             # latest assignment for this job+seeker, if any
@@ -194,6 +194,12 @@ def employer_dashboard(request):
                 .order_by("-assigned_at")
                 .first()
             )
+            resume_obj = SeekerResume.objects.filter(
+                user=seeker,
+                resume__isnull=False
+            ).exclude(resume="").first()
+
+            resume_file = resume_obj.resume if resume_obj else None
 
             base = {
                 "label": f"Candidate #{idx}",
@@ -202,7 +208,7 @@ def employer_dashboard(request):
                 "assignment_id": assignment.id if assignment else None,
                 "has_assignment": assignment is not None,
                 "completed": assignment.completed if assignment else False,
-                "resume": resume,
+                "resume_file": resume_file,
             }
 
             if assignment and assignment.completed:
