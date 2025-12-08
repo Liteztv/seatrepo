@@ -5,7 +5,7 @@
 <div class="container mt-4">
 
     <h2>Interview Review</h2>
-    <p class="text-muted">
+    <p class="dark-muted">
         Job: <strong>{{ assignment.job.title }}</strong><br>
         Candidate: <strong>Candidate #{{ assignment.seeker.id }}</strong>
     </p>
@@ -19,7 +19,7 @@
                 <h5>Question</h5>
                 <p>{{ r.question }}</p>
 
-                <h6 class="mt-3">Video Response</h6>
+                <h5 class="dark-muted">Video Response</h5>
 
                 <video controls preload="metadata" style="width:100%;max-height:400px;">
                     <source src="{{ r.video.url }}" type="video/mp4">
@@ -29,7 +29,7 @@
             </div>
         </div>
     {% empty %}
-        <p class="text-muted">No responses found.</p>
+        <p class="dark-muted    ">No responses found.</p>
     {% endfor %}
 
     <div class="d-flex gap-2 mt-4">
