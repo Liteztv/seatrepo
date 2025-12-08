@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django import forms
 from django.contrib.auth.models import User
 from django.utils.safestring import mark_safe
@@ -83,6 +84,30 @@ class ResumeUploadForm(forms.ModelForm):
     class Meta:
         model = SeekerResume
         fields = ["resume"]
+
+    def clean_resume(self):
+        resume = self.cleaned_data.get("resume")
+
+        if not resume:
+            return resume
+
+        if not resume.name.lower().endswith(".pdf"):
+            raise ValidationError("Only PDF files are allowed for resumes.")
+
+        if resume.content_type != "application/pdf":
+            raise ValidationError("Uploaded file must be a valid PDF.")
+
+        return resume
+
+
+# class ResumeUploadForm(forms.ModelForm):
+#     class Meta:
+#         model = SeekerResume
+#         fields = ["resume"]
+#         resume = forms.FileField(
+#         label="Upload Resume (PDF recommended)",
+#         help_text="PDF files open directly in the browser."
+#     )
 
 
 

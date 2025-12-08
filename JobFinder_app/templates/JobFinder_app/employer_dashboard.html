@@ -74,13 +74,13 @@
                                             {{ seeker.match_percentage }}%
                                         </span>
                                         {% if seeker.resume_file %}
-                                            <a href="{{ seeker.resume_file.url }}"
+                                            <a href="{% url 'view_resume' seeker.user_id %}"
                                             class="btn btn-sm btn-outline-secondary"
                                             target="_blank">
                                                 View Resume
                                             </a>
                                         {% else %}
-                                            <span class="text-muted">No resume uploaded</span>
+                                            <span class="dark-muted">No resume uploaded</span>
                                         {% endif %}
 
 

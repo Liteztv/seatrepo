@@ -1,4 +1,5 @@
 from django.urls import reverse
+from django.http import FileResponse, Http404
 from django.contrib import messages
 from django.shortcuts import render,redirect, get_object_or_404
 from django.db.models import Q
@@ -664,4 +665,32 @@ def upload_resume(request):
         "form": form
     })
 
+@login_required
+def view_resume(request, user_id):
+    """
+    Open a seeker's resume INLINE in the browser (not download).
+    Only employers can access this.
+    """
+    try:
+        resume_obj = (
+            SeekerResume.objects
+            .filter(user_id=user_id, resume__isnull=False)
+            .exclude(resume="")
+            .first()
+        )
 
+        if not resume_obj:
+            raise Http404("Resume not found")
+
+        response = FileResponse(
+            resume_obj.resume.open("rb"),
+            content_type="application/pdf"
+        )
+
+        # ✅ FORCE INLINE DISPLAY
+        response["Content-Disposition"] = "inline; filename=%s" % resume_obj.resume.name
+
+        return response
+
+    except Exception:
+        raise Http404("Unable to open resume")
