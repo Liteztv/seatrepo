@@ -73,25 +73,42 @@
                                         <span class="badge bg-info text-dark me-2">
                                             {{ seeker.match_percentage }}%
                                         </span>
-                                        {% if seeker.resume_file %}
-                                            <a href="{% url 'view_resume' seeker.user_id %}"
-                                            class="btn btn-sm btn-outline-secondary"
-                                            target="_blank">
+                                        
+
+                                        {% if seeker.can_view_resume %}
+                                            <a href="{% url 'view_resume' item.job.id seeker.user_id %}"
+                                            target="_blank"
+                                            class="btn btn-sm btn-outline-info">
                                                 View Resume
                                             </a>
                                         {% else %}
-                                            <span class="dark-muted">No resume uploaded</span>
-                                        {% endif %}
-
-
-                                        {% if seeker.has_assignment %}
-                                            <span class="badge bg-secondary">Interview Sent</span>
-                                        {% else %}
-                                            <a href="{% url 'send_interview' item.job.id seeker.user_id %}"
-                                               class="btn btn-sm btn-outline-success">
-                                                Send Interview
+                                            <a href="{% url 'purchase_resume_access' item.job.id seeker.user_id %}"
+                                            class="btn btn-sm btn-warning">
+                                                Unlock Resume
                                             </a>
                                         {% endif %}
+                                        &nbsp;&nbsp;
+
+
+                                        {% if seeker.can_interview %}
+                                            <a href="{% url 'send_interview' item.job.id seeker.user_id %}"
+                                            class="btn btn-sm btn-outline-success">
+                                                Send Interview
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'purchase_interview_access' item.job.id seeker.user_id %}"
+                                            class="btn btn-sm btn-warning">
+                                                Unlock Interview
+                                            </a>
+                                            
+                                        {% endif %}
+                                        {% if messages %}
+                                        <div class="container mt-3">
+                                            
+                                        </div>
+                                        {% endif %}
+
+
                                     </div>
                                 </li>
                             {% endfor %}
@@ -110,24 +127,46 @@
                                         <strong>{{ seeker.label }}</strong><br>
                                         <small class="dark-muted">Interview completed</small>
                                     </div>
-                                        {% if seeker.resume %}
-                                            <a href="{{ seeker.resume.resume.url }}"
-                                            class="btn btn-sm btn-outline-secondary"
-                                            target="_blank">
+                                        {% if seeker.can_view_resume %}
+                                            <a href="{% url 'view_resume' item.job.id seeker.user_id %}"
+                                            target="_blank"
+                                            class="btn btn-sm btn-outline-info">
                                                 View Resume
                                             </a>
                                         {% else %}
-                                            <span class="dark-muted">No resume</span>
+                                            <a href="{% url 'purchase_resume_access' item.job.id seeker.user_id %}"
+                                            class="btn btn-sm btn-warning">
+                                                Unlock Resume
+                                            </a>
                                         {% endif %}
-                                    <div><a href="{% url 'review_interview' seeker.assignment_id %}"
+                                        &nbsp;&nbsp;
+
+
+                                        {% if seeker.can_interview %}
+                                            <a href="{% url 'send_interview' item.job.id seeker.user_id %}"
+                                            class="btn btn-sm btn-outline-success">
+                                                Send Interview
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'purchase_interview_access' item.job.id seeker.user_id %}"
+                                            class="btn btn-sm btn-warning">
+                                                Unlock Interview
+                                            </a>
+                                        {% endif %}
+                                        
+                                        {% if seeker.can_hire %}
+                                            <a href="{% url 'hire_from_assignment' seeker.assignment_id %}"
                                             class="btn btn-sm btn-outline-primary">
-                                            Review Interview
-                                            </a></div>
-                                    <div class="d-flex align-items-center">
-                                        <a href="{% url 'hire_from_assignment' seeker.assignment_id %}"
-                                           class="btn btn-sm btn-outline-primary me-2">
-                                            Hire
-                                        </a>
+                                                Hire
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'purchase_hire_access' item.job.id seeker.user_id %}"
+                                            class="btn btn-sm btn-danger">
+                                                Unlock Hire
+                                            </a>
+                                        {% endif %}
+                                        
+                                        
                                     </div>
                                 </li>
                             {% endfor %}

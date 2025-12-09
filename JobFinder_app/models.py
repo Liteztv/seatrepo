@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.conf import settings
 
 
 # ==========================
@@ -235,3 +236,31 @@ class SeekerResume(models.Model):
 
     def __str__(self):
         return f"Resume – {self.user.username}"
+
+
+class EmployerAccess(models.Model):
+    ACCESS_CHOICES = (
+        ("interview", "Interview Access"),
+        ("resume", "Resume Access"),
+        ("hire", "Hire / Messaging Access"),
+    )
+
+    employer = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="access_grants"
+    )
+    seeker = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="access_receipts"
+    )
+    job = models.ForeignKey(Job, on_delete=models.CASCADE)
+
+    access_type = models.CharField(max_length=20, choices=ACCESS_CHOICES)
+
+    price = models.DecimalField(max_digits=6, decimal_places=2)
+    paid = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("employer", "seeker", "job", "access_type")
+
+    def __str__(self):
+        return f"{self.access_type} access ({self.employer} → {self.seeker})"

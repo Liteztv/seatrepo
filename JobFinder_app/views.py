@@ -15,10 +15,12 @@ from .forms import ( SeekerFormOne, SeekerFormTwo, SeekerFormThree, Registration
 # from django.urls import reverse
 from .models import ( SeekerModelOne, SeekerModelThree, SeekerModelTwo, Profile, 
                      Job, JobRequirementOne, JobRequirementTwo, JobRequirementThree,
-                     InterviewAssignment, InterviewResponse, Message, Conversation, SeekerResume,
+                     InterviewAssignment, InterviewResponse, Message, Conversation, SeekerResume, EmployerAccess
                      )
 
 from django.db import transaction
+from .utils import has_hire_access, has_interview_access, has_resume_access
+from django.conf import settings
 
 def get_or_create_conversation(user1, user2, job=None):
     convo = Conversation.objects.filter(
@@ -212,11 +214,18 @@ def employer_dashboard(request):
                 "has_assignment": assignment is not None,
                 "completed": assignment.completed if assignment else False,
                 "resume_file": resume_file,
+                "can_interview": has_interview_access(request.user, seeker, job),
+                "can_view_resume": has_resume_access(request.user, seeker, job),
+                "can_hire": has_hire_access(request.user, seeker, job),
             }
 
             if assignment and assignment.completed:
                 interviewed_candidates.append(base)
+            elif assignment:
+                base["interview_sent"] = True
+                open_candidates.append(base)
             else:
+                base["interview_sent"] = False
                 open_candidates.append(base)
 
         job_data.append({
@@ -432,6 +441,14 @@ def send_interview(request, job_id, seeker_id):
         Q(user1=seeker, user2=request.user)
     ).first()
 
+    if not has_interview_access(request.user, seeker, job):
+        messages.error(
+        request,
+        "Purchase interview access to send questions."
+        )
+        return redirect("employer_dashboard")
+
+
     if not conversation:
         conversation = Conversation.objects.create(
             user1=request.user,
@@ -614,27 +631,50 @@ def inbox_pro(request):
 def conversation_view(request, convo_id):
     convo = get_object_or_404(Conversation, id=convo_id)
 
-    # permission check
+    # ✅ Must be a participant
     if request.user not in (convo.user1, convo.user2):
         return redirect("inbox_pro")
 
+    # ✅ Identify the OTHER user
+    other_user = convo.user2 if request.user == convo.user1 else convo.user1
+
+    # ✅ BLOCK EMPLOYER FROM SENDING UNLESS HIRED / PAID
     if request.method == "POST":
-        msg = request.POST.get("message")
-        if msg.strip():
+        if request.user.profile.role == "employer":
+            if not has_hire_access(request.user, other_user, convo.job):
+                messages.error(
+                    request,
+                    "You must hire this candidate before sending messages."
+                )
+                return redirect("conversation_view", convo_id=convo.id)
+
+        msg = request.POST.get("message", "").strip()
+        if msg:
             Message.objects.create(
                 conversation=convo,
                 sender=request.user,
-                body=msg
+                receiver=other_user,
+                body=msg,
+                job=convo.job,
             )
 
+    # ✅ Mark received messages as read (DO NOT gate this)
+    Message.objects.filter(
+        conversation=convo,
+        receiver=request.user,
+        is_read=False
+    ).update(is_read=True)
+
+    # ✅ Load conversations list
+    conversations = Conversation.objects.filter(
+        Q(user1=request.user) | Q(user2=request.user)
+    ).distinct()
+
     return render(request, "JobFinder_app/inbox_pro.html", {
-        "conversations": Conversation.objects.filter(
-            user1=request.user
-        ) | Conversation.objects.filter(
-            user2=request.user
-        ),
-        "active_conversation": convo
+        "conversations": conversations,
+        "active_conversation": convo,
     })
+
 
 @login_required
 def review_interview(request, assignment_id):
@@ -668,29 +708,49 @@ def upload_resume(request):
     })
 
 @login_required
-def view_resume(request, user_id):
+def view_resume(request, job_id, seeker_id):
     """
-    Open a seeker's resume INLINE in the browser (not download).
-    Only employers can access this.
+    Open a seeker's resume INLINE in the browser.
+    Only employers with resume access may view.
     """
-    try:
-        resume_obj = (
-            SeekerResume.objects
-            .filter(user_id=user_id, resume__isnull=False)
-            .exclude(resume="")
-            .first()
+
+    # ✅ Only employers allowed
+    if request.user.profile.role != "employer":
+        raise Http404()
+
+    # ✅ Job must belong to employer
+    job = get_object_or_404(Job, id=job_id, user=request.user)
+
+    # ✅ Find resume safely
+    resume_obj = (
+        SeekerResume.objects
+        .filter(user_id=seeker_id)
+        .exclude(resume="")
+        .exclude(resume__isnull=True)
+        .first()
+    )
+
+    if not resume_obj or not resume_obj.resume:
+        messages.error(request, "This candidate has not uploaded a resume.")
+        return redirect("employer_dashboard")
+
+    # ✅ PAYWALL ENFORCEMENT (CRITICAL)
+    if not has_resume_access(request.user, resume_obj.user, job):
+        messages.error(
+            request,
+            "You must unlock resume access to view this document."
         )
+        return redirect("employer_dashboard")
 
-        if not resume_obj:
-            raise Http404("Resume not found")
-
+    try:
         response = FileResponse(
             resume_obj.resume.open("rb"),
             content_type="application/pdf"
         )
 
-        # ✅ FORCE INLINE DISPLAY
-        response["Content-Disposition"] = "inline; filename=%s" % resume_obj.resume.name
+        # ✅ FORCE INLINE VIEWING (NOT DOWNLOAD)
+        filename = resume_obj.resume.name.split("/")[-1]
+        response["Content-Disposition"] = f'inline; filename="{filename}"'
 
         return response
 
@@ -737,3 +797,121 @@ def delete_account(request):
         return redirect("landing")
 
     return render(request, "JobFinder_app/delete_account.html", {"form": form})
+
+
+@login_required
+def purchase_hire_access(request, job_id, seeker_id):
+    job = get_object_or_404(Job, id=job_id, user=request.user)
+    seeker = get_object_or_404(User, id=seeker_id)
+
+    access, created = EmployerAccess.objects.get_or_create(
+        employer=request.user,
+        seeker=seeker,
+        job=job,
+        defaults={"paid": True}
+    )
+
+    if not created:
+        access.paid = True
+        access.save()
+
+    messages.success(
+        request,
+        "Hire access granted. You may now message this candidate."
+    )
+
+    return redirect("employer_dashboard")
+
+def purchase_interview_access(request, job_id, seeker_id):
+    return _purchase_access(request, job_id, seeker_id, "interview", settings.INTERVIEW_ACCESS_PRICE)
+
+def purchase_resume_access(request, job_id, seeker_id):
+    return _purchase_access(request, job_id, seeker_id, "resume", settings.RESUME_ACCESS_PRICE)
+
+def purchase_hire_access(request, job_id, seeker_id):
+    return _purchase_access(request, job_id, seeker_id, "hire", settings.HIRE_ACCESS_PRICE)
+
+def _purchase_access(request, job_id, seeker_id, access_type, price):
+    job = get_object_or_404(Job, id=job_id, user=request.user)
+    seeker = get_object_or_404(User, id=seeker_id)
+
+    EmployerAccess.objects.update_or_create(
+        employer=request.user,
+        seeker=seeker,
+        job=job,
+        access_type=access_type,
+        defaults={"paid": True, "price": price},
+    )
+
+    messages.success(request, f"{access_type.capitalize()} access granted.")
+    return redirect("employer_dashboard")
+
+@login_required
+def buy_credits(request):
+    """
+    Placeholder for Stripe / credit purchase page.
+    Currently free or $0 mode.
+    """
+    messages.info(request, "Credits system coming soon. Currently free mode.")
+    return redirect("account_settings")
+
+
+@login_required
+def purchase_interview_access(request, job_id, seeker_id):
+    job = get_object_or_404(Job, id=job_id, user=request.user)
+    seeker = get_object_or_404(User, id=seeker_id)
+
+    EmployerAccess.objects.update_or_create(
+        employer=request.user,
+        seeker=seeker,
+        job=job,
+        access_type="interview",
+        defaults={
+            "paid": True,
+            "price": 0.00,
+        }
+    )
+
+    messages.success(request, "Interview unlocked.")
+    return redirect("employer_dashboard")
+
+
+@login_required
+def purchase_resume_access(request, job_id, seeker_id):
+    job = get_object_or_404(Job, id=job_id, user=request.user)
+    seeker = get_object_or_404(User, id=seeker_id)
+
+    EmployerAccess.objects.update_or_create(
+        employer=request.user,
+        seeker=seeker,
+        job=job,
+        access_type="resume",
+        defaults={
+            "paid": True,
+            "price": settings.RESUME_ACCESS_PRICE,
+        }
+    )
+
+    messages.success(request, "Resume access unlocked.")
+    return redirect("employer_dashboard")
+
+
+
+@login_required
+def purchase_hire_access(request, job_id, seeker_id):
+    job = get_object_or_404(Job, id=job_id, user=request.user)
+    seeker = get_object_or_404(User, id=seeker_id)
+
+    EmployerAccess.objects.update_or_create(
+        employer=request.user,
+        seeker=seeker,
+        job=job,
+        access_type="hire",
+        defaults={
+            "paid": True,
+            "price": settings.HIRE_ACCESS_PRICE,
+        }
+    )
+
+    messages.success(request, "Hire access unlocked.")
+    return redirect("employer_dashboard")
