@@ -6,9 +6,11 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
 from .forms import ( SeekerFormOne, SeekerFormTwo, SeekerFormThree, RegistrationForm, LoginForm,
                     JobForm, JobRequirementOneForm, JobRequirementTwoForm, JobRequirementThreeForm, ResumeUploadForm,
+                    EmailChangeForm, ConfirmDeleteForm,
                     )
 # from django.urls import reverse
 from .models import ( SeekerModelOne, SeekerModelThree, SeekerModelTwo, Profile, 
@@ -694,3 +696,44 @@ def view_resume(request, user_id):
 
     except Exception:
         raise Http404("Unable to open resume")
+
+@login_required
+def account_settings(request):
+    return render(request, "JobFinder_app/account_settings.html")
+
+
+@login_required
+def change_email(request):
+    form = EmailChangeForm(request.POST or None, instance=request.user)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Email updated successfully.")
+        return redirect("account_settings")
+
+    return render(request, "JobFinder_app/change_email.html", {"form": form})
+
+
+@login_required
+def change_password(request):
+    form = PasswordChangeForm(request.user, request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        user = form.save()
+        update_session_auth_hash(request, user)
+        messages.success(request, "Password changed successfully.")
+        return redirect("account_settings")
+
+    return render(request, "JobFinder_app/change_password.html", {"form": form})
+
+
+@login_required
+def delete_account(request):
+    form = ConfirmDeleteForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        request.user.delete()
+        messages.success(request, "Your account has been deleted.")
+        return redirect("landing")
+
+    return render(request, "JobFinder_app/delete_account.html", {"form": form})

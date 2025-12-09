@@ -26,6 +26,11 @@ urlpatterns = [
     path("create_job/", views.create_job, name="create_job"),
     path("upload_resume", views.upload_resume, name="upload_resume"),
     path("resume/view/<int:user_id>/", views.view_resume, name="view_resume"),
+    path("settings/", views.account_settings, name="account_settings"),
+    path("settings/email/", views.change_email, name="change_email"),
+    path("settings/password/", views.change_password, name="change_password"),
+    path("settings/delete/", views.delete_account, name="delete_account"),
+
 
 
     # Seeker Forms

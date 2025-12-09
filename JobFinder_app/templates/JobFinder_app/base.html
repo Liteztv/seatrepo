@@ -181,6 +181,18 @@
             color: #ffffff !important;
         }
 
+        .settings-link .nav-icon {
+            color: #ffffff !important;
+        }
+
+        .bi-gear-fill {
+            transition: transform 0.3s ease;
+}
+
+        .bi-gear-fill:hover {
+            transform: rotate(90deg);
+}
+
         /* ===========================
         ALERTS
         =========================== */
@@ -397,8 +409,41 @@ document.addEventListener("DOMContentLoaded", function () {
              <span class="d-none d-md-inline">
                  <strong>{{ request.user.username }}</strong>&nbsp;&nbsp;&nbsp;&nbsp;
             </span>
-            <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">Logout</a>
+            
+            
         {% endif %}
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle p-0"
+            href="#"
+            id="settingsDropdown"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            data-bs-placement="bottom"
+            title="Account settings">
+                <i class="bi bi-gear-fill fs-5 text-white"></i>
+            </a>
+
+            <ul class="dropdown-menu dropdown-menu-end shadow"
+                aria-labelledby="settingsDropdown">
+
+                <li>
+                    <a class="dropdown-item" href="{% url 'account_settings' %}">
+                        <i class="bi bi-person-gear me-2"></i> Account Settings
+                    </a>
+                </li>
+
+                <li><hr class="dropdown-divider"></li>
+
+                <li>
+                    <a class="dropdown-item text-danger"
+                    href="{% url 'logout' %}">
+                        <i class="bi bi-box-arrow-right me-2"></i> Logout
+                    </a>
+                </li>
+            </ul>
+        </li>
+        
 
     </div>
 </nav>
@@ -434,6 +479,12 @@ document.addEventListener("DOMContentLoaded", function () {
         root.setAttribute('data-theme', next);
         localStorage.setItem('theme', next);
     });
+</script>
+<script>
+var tooltipTriggerList = [].slice.call(
+    document.querySelectorAll('[data-bs-toggle="tooltip"]')
+);
+tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
 </script>
 
 </body>

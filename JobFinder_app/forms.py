@@ -6,6 +6,8 @@ from django.forms import ModelForm
 from .models import ( SeekerModelOne, SeekerModelTwo, SeekerModelThree, Profile, Job, JobRequirementOne, JobRequirementTwo, JobRequirementThree, SeekerResume
                      
                       )
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import PasswordChangeForm
 
 
 
@@ -98,6 +100,27 @@ class ResumeUploadForm(forms.ModelForm):
             raise ValidationError("Uploaded file must be a valid PDF.")
 
         return resume
+
+class EmailChangeForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ["email"]
+
+    def clean_email(self):
+        email = self.cleaned_data["email"]
+        if User.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("This email is already in use.")
+        return email
+
+
+class ConfirmDeleteForm(forms.Form):
+    confirm = forms.BooleanField(
+        label="I understand this action is permanent."
+    )
+
+
+
+
 
 
 # class ResumeUploadForm(forms.ModelForm):
