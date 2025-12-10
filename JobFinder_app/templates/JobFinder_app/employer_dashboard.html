@@ -134,18 +134,29 @@
                                         <strong>{{ seeker.label }}</strong><br>
                                         <small class="dark-muted">Interview completed</small>
                                     </div>
-                                        {% if seeker.can_view_resume %}
-                                            <a href="{% url 'view_resume' item.job.id seeker.user_id %}"
+                                        {% if not seeker.has_resume %}
+                                            <span class="text-muted fst-italic">
+                                                No resume available
+                                            </span>
+
+                                        {% elif seeker.can_view_resume %}
+                                            <a href="{% url 'view_resume' seeker.user_id %}"
                                             target="_blank"
                                             class="btn btn-sm btn-outline-info">
                                                 View Resume
                                             </a>
+
                                         {% else %}
+                                            <button class="btn btn-sm btn-secondary" disabled>
+                                                Locked
+                                            </button>
+
                                             <a href="{% url 'purchase_resume_access' item.job.id seeker.user_id %}"
-                                            class="btn btn-sm btn-warning">
+                                            class="btn btn-sm btn-outline-warning ms-1">
                                                 Unlock Resume
                                             </a>
                                         {% endif %}
+
                                         &nbsp;&nbsp;
 
 
@@ -159,6 +170,13 @@
                                             class="btn btn-sm btn-warning">
                                                 Unlock Interview
                                             </a>
+                                            print(
+                                                "ACCESS CHECK:",
+                                                job.id,
+                                                seeker.id,
+                                                has_interview_access(request.user, seeker, job)
+                                            )
+
                                         {% endif %}
                                         
                                         {% if seeker.can_hire %}
@@ -193,4 +211,5 @@
     {% endif %}
 
 </div>
+
 {% endblock %}

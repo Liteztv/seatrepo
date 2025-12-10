@@ -3,8 +3,11 @@ from .models import (
     Profile,
     SeekerModelOne, SeekerModelTwo, SeekerModelThree,
     Job, JobRequirementOne, JobRequirementTwo, JobRequirementThree,
-    Message, InterviewAssignment, InterviewResponse
+    Message, InterviewAssignment, InterviewResponse, 
 )
+
+# EmployerCreditWallet,
+#     CreditTransaction, AccessLog, AccessPurchase
 
 admin.site.register(SeekerModelOne)
 admin.site.register(SeekerModelTwo)
@@ -12,6 +15,10 @@ admin.site.register(SeekerModelThree)
 admin.site.register(Message)
 admin.site.register(InterviewAssignment)
 admin.site.register(InterviewResponse)
+# admin.site.register(EmployerCreditWallet)
+# admin.site.register(CreditTransaction)
+# admin.site.register(AccessLog)
+# admin.site.register(AccessPurchase)
 
 class JobRequirementOneInline(admin.StackedInline):
     model = JobRequirementOne

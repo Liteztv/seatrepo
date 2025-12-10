@@ -130,3 +130,22 @@ MEDIA_ROOT = BASE_DIR / "media"
 RESUME_ACCESS_PRICE = 0.00
 INTERVIEW_ACCESS_PRICE = 0.00
 HIRE_ACCESS_PRICE = 0.00
+
+# # --- Stripe test keys (replace with your real test keys) ---
+# STRIPE_PUBLIC_KEY = "pk_test_xxx"
+# STRIPE_SECRET_KEY = "sk_test_xxx"
+# STRIPE_WEBHOOK_SECRET = "whsec_xxx"
+
+#       # mark candidate as hire
+
+# # --- Credit bundles (discounts) ---
+# # Price of a bundle and how many credits it gives
+# CREDIT_BUNDLE_PRICE = 0.00     # e.g. 49.00 in production
+# CREDIT_BUNDLE_CREDITS = 50     # 50 credits per bundle
+
+# # How many credits each action costs
+# CREDITS_PER_MESSAGE   = 1
+# CREDITS_PER_INTERVIEW = 2
+# CREDITS_PER_RESUME    = 1
+# CREDITS_PER_HIRE      = 5
+

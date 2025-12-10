@@ -39,18 +39,35 @@ def _has_access(employer, seeker, job, access_type, price):
 
 
 def has_interview_access(employer, seeker, job):
-    return _has_access(
-        employer, seeker, job, "interview", settings.INTERVIEW_ACCESS_PRICE
-    )
+    from django.conf import settings
+    from .models import EmployerAccess
+
+    # ❌ REMOVE auto-grant based on price
+    return EmployerAccess.objects.filter(
+        employer=employer,
+        seeker=seeker,
+        job=job,
+        access_type="interview",
+        paid=True,
+    ).exists()
+
 
 
 def has_resume_access(employer, seeker, job):
-    return _has_access(
-        employer, seeker, job, "resume", settings.RESUME_ACCESS_PRICE
-    )
+    return EmployerAccess.objects.filter(
+        employer=employer,
+        seeker=seeker,
+        job=job,
+        access_type="resume",
+        paid=True,
+    ).exists()
 
 
 def has_hire_access(employer, seeker, job):
-    return _has_access(
-        employer, seeker, job, "hire", settings.HIRE_ACCESS_PRICE
-    )
+    return EmployerAccess.objects.filter(
+        employer=employer,
+        seeker=seeker,
+        job=job,
+        access_type="hire",
+        paid=True,
+    ).exists()

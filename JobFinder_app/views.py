@@ -204,6 +204,11 @@ def employer_dashboard(request):
                 resume__isnull=False
             ).exclude(resume="").first()
 
+            resume_exists= SeekerResume.objects.filter(
+                user=seeker,
+                resume__isnull=False
+            ).exclude(resume="").first()
+
             resume_file = resume_obj.resume if resume_obj else None
 
             base = {
@@ -214,6 +219,7 @@ def employer_dashboard(request):
                 "has_assignment": assignment is not None,
                 "completed": assignment.completed if assignment else False,
                 "resume_file": resume_file,
+                "has_resume": resume_exists,
                 "can_interview": has_interview_access(request.user, seeker, job),
                 "can_view_resume": has_resume_access(request.user, seeker, job),
                 "can_hire": has_hire_access(request.user, seeker, job),
@@ -869,7 +875,7 @@ def purchase_interview_access(request, job_id, seeker_id):
         access_type="interview",
         defaults={
             "paid": True,
-            "price": 0.00,
+            "price": settings.INTERVIEW_ACCESS_PRICE,
         }
     )
 

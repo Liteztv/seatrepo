@@ -264,3 +264,27 @@ class EmployerAccess(models.Model):
 
     def __str__(self):
         return f"{self.access_type} access ({self.employer} → {self.seeker})"
+
+class EmployerCreditWallet(models.Model):
+    employer = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name="credit_wallet"
+    )
+    balance = models.IntegerField(default=0)  # number of credits
+
+    def __str__(self):
+        return f"{self.employer.username} wallet: {self.balance} credits"
+
+
+class CreditTransaction(models.Model):
+    wallet = models.ForeignKey(
+        EmployerCreditWallet,
+        on_delete=models.CASCADE,
+        related_name="transactions",
+    )
+    amount = models.IntegerField()  # positive = add, negative = use
+    reason = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        sign = "+" if self.amount >= 0 else ""
+        return f"{sign}{self.amount} credits ({self.reason})"
