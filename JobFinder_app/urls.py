@@ -52,6 +52,12 @@ urlpatterns = [
         name="hire_from_assignment",
     ),
 
+    path(
+        "candidate/<int:job_id>/<int:seeker_id>/",
+        views.candidate_summary,
+        name="candidate_summary"
+    ),
+
     # -----------------------------
     # Messaging
     # -----------------------------

@@ -1,0 +1,52 @@
+{% extends "JobFinder_app/base.html" %}
+{% block title %}Candidate Summary{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <div class="mb-3">
+        <a href="{% url 'employer_dashboard' %}" class="btn btn-outline-secondary btn-sm">
+            ← Back to Dashboard
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <h3 class="mb-2">Candidate Profile</h3>
+
+            <p class="text-muted mb-3">
+                Anonymous candidate matched for <strong>{{ job.title }}</strong>
+            </p>
+
+            {% if total_years %}
+                <p>
+                    <strong>Total Experience:</strong>
+                    {{ total_years }} years
+                </p>
+            {% endif %}
+
+            <hr>
+
+            <h5>Relevant Skills</h5>
+
+            {% if skills %}
+                <ul class="list-group mt-3">
+                    {% for s in skills %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ s.name }}
+                            <span class="badge bg-primary">
+                                {{ s.years }} yrs
+                            </span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">No relevant skills listed.</p>
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

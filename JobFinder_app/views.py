@@ -217,6 +217,7 @@ def employer_dashboard(request):
                 "can_interview": has_interview_access(request.user, seeker, job),
                 "can_view_resume": has_resume_access(request.user, seeker, job),
                 "can_hire": has_hire_access(request.user, seeker, job),
+                "interview_sent": bool(assignment),
             }
 
             if assignment and assignment.completed:
@@ -915,3 +916,50 @@ def purchase_hire_access(request, job_id, seeker_id):
 
     messages.success(request, "Hire access unlocked.")
     return redirect("employer_dashboard")
+
+@login_required
+def candidate_summary(request, job_id, seeker_id):
+    """
+    Employer-only anonymous candidate skill summary.
+    Shows only skills with > 0 experience.
+    """
+
+    # ✅ Ensure job belongs to employer
+    job = get_object_or_404(Job, id=job_id, user=request.user)
+
+    # ✅ Fetch seeker experience models safely
+    sm1 = SeekerModelOne.objects.filter(user_id=seeker_id).first()
+    sm2 = SeekerModelTwo.objects.filter(user_id=seeker_id).first()
+    sm3 = SeekerModelThree.objects.filter(user_id=seeker_id).first()
+
+    if not any([sm1, sm2, sm3]):
+        raise Http404("Candidate data not found")
+
+    skills = []
+
+    def extract_skills(instance, exclude=("id", "user", "first_name", "last_name")):
+        if not instance:
+            return
+        for field in instance._meta.fields:
+            name = field.name
+            if name in exclude:
+                continue
+            value = getattr(instance, name)
+            if isinstance(value, int) and value > 0:
+                skills.append({
+                    "name": name.replace("_", " ").title(),
+                    "years": value,
+                })
+
+    extract_skills(sm1)
+    extract_skills(sm2)
+    extract_skills(sm3)
+
+    total_years = sm1.total_years_of_experience if sm1 else None
+
+    return render(request, "JobFinder_app/candidate_summary.html", {
+        "job": job,
+        "seeker_id": seeker_id,
+        "total_years": total_years,
+        "skills": skills,
+    })
