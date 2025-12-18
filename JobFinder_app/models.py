@@ -81,11 +81,39 @@ class SeekerModelThree(models.Model):
     def __str__(self):
         return f"{self.user.username} Experience 3"
 
+class MachinistExperience(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    years_experience = models.IntegerField(null=True, blank=True)
+
+    blueprint_reading = models.IntegerField(null=True, blank=True)
+
+    cnc_milling = models.IntegerField(null=True, blank=True)
+    cnc_turning = models.IntegerField(null=True, blank=True)
+
+    manual_lathe = models.IntegerField(null=True, blank=True)
+    manual_mill = models.IntegerField(null=True, blank=True)
+
+    welding = models.IntegerField(null=True, blank=True)
+    fabrication = models.IntegerField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Machinist Experience – {self.user.username}"
+
 
 # ====================
 # JOB SYSTEM
 # ====================
 class Job(models.Model):
+    SOFTWARE = "software"
+    MACHINIST = "machinist"
+
+    JOB_TYPE_CHOICES = [
+        (SOFTWARE, "Software Engineering"),
+        (MACHINIST, "Machinist / Fabrication"),
+    ]
     user = models.ForeignKey(User, on_delete=models.CASCADE)  # Employer account
 
     title = models.CharField(max_length=255)
@@ -95,6 +123,12 @@ class Job(models.Model):
     interview_questions = models.TextField(
         blank=True,
         help_text="Enter one question per line."
+    )
+
+    job_type = models.CharField(
+        max_length=20,
+        choices=JOB_TYPE_CHOICES,
+        default=SOFTWARE
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -163,6 +197,25 @@ class JobRequirementThree(models.Model):
 
     def __str__(self):
         return f"Req3 for {self.job.title}"
+
+class MachinistJobRequirement(models.Model):
+    job = models.OneToOneField(
+        Job,
+        on_delete=models.CASCADE,
+        related_name="machinist_requirements"
+    )
+
+    years_experience = models.IntegerField(default=0)
+    blueprint_reading = models.IntegerField(default=0)
+
+    cnc_milling = models.IntegerField(default=0)
+    cnc_turning = models.IntegerField(default=0)
+
+    manual_lathe = models.IntegerField(default=0)
+    manual_mill = models.IntegerField(default=0)
+
+    welding = models.PositiveIntegerField(default=0)
+    fabrication = models.PositiveIntegerField(default=0)
 
 
 # ====================

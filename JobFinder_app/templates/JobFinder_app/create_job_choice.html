@@ -1,0 +1,16 @@
+{% extends "JobFinder_app/base.html" %}
+{% block content %}
+<div class="container mt-5 text-center">
+    <h2>Create a Job</h2>
+    <p>Select the type of job you want to post</p>
+
+    <div class="d-grid gap-3 col-6 mx-auto mt-4">
+        <a href="{% url 'create_job_software' %}" class="btn btn-primary btn-lg">
+            Software Engineering
+        </a>
+        <a href="{% url 'create_job_machinist' %}" class="btn btn-warning btn-lg">
+            Machinist / Welding / Fabrication
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -21,7 +21,7 @@ urlpatterns = [
     # -----------------------------
     # Jobs (Employer)
     # -----------------------------
-    path("create_job/", views.create_job, name="create_job"),
+    # path("create_job/", views.create_job, name="create_job"),
     path("job/<int:job_id>/edit/", views.edit_job, name="edit_job"),
     path("job/<int:job_id>/delete/", views.delete_job, name="delete_job"),
 
@@ -120,8 +120,16 @@ urlpatterns = [
     path("seeker_form1/", views.seeker_form_one, name="seeker_form1"),
     path("seeker_form2/", views.seeker_form_two, name="seeker_form2"),
     path("seeker_form3/", views.seeker_form_three, name="seeker_form3"),
-   
+    path("seeker/machinist/",views.machinist_experience_view,name="machinist_experience"),
+
+    path("create-job/", views.create_job_select_type, name="create_job"),
+    path("jobs/create/software/", views.create_job_software, name="create_job_software"),
+    path("jobs/create/machinist/", views.create_job_machinist, name="create_job_machinist"),
+
 ]
+
+# path("jobs/create/", views.create_job_choice, name="create_job"),
+
 
 
 

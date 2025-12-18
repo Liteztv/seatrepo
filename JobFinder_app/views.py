@@ -10,12 +10,13 @@ from django.contrib.auth import authenticate, login, logout, update_session_auth
 from django.contrib.auth.forms import PasswordChangeForm
 from .forms import ( SeekerFormOne, SeekerFormTwo, SeekerFormThree, RegistrationForm, LoginForm,
                     JobForm, JobRequirementOneForm, JobRequirementTwoForm, JobRequirementThreeForm, ResumeUploadForm,
-                    EmailChangeForm, ConfirmDeleteForm,
+                    EmailChangeForm, ConfirmDeleteForm, MachinistJobRequirementForm, MachinistExperienceForm
                     )
 # from django.urls import reverse
 from .models import ( SeekerModelOne, SeekerModelThree, SeekerModelTwo, Profile, 
                      Job, JobRequirementOne, JobRequirementTwo, JobRequirementThree,
-                     InterviewAssignment, InterviewResponse, Message, Conversation, SeekerResume, EmployerAccess
+                     InterviewAssignment, InterviewResponse, Message, Conversation, SeekerResume, EmployerAccess,
+                     MachinistExperience,
                      )
 
 from django.db import transaction
@@ -94,13 +95,45 @@ def delete_job(request, job_id):
 
     return render(request, "JobFinder_app/delete_job.html", {"job": job})
 
+@login_required
+def create_job_select_type(request):
+    return render(request, "JobFinder_app/create_job_select_type.html")
 
-def create_job(request):
+
+@login_required
+def create_job_machinist(request):
+    if request.method == "POST":
+        job_form = JobForm(request.POST)
+        req_form = MachinistJobRequirementForm(request.POST)
+
+        if job_form.is_valid() and req_form.is_valid():
+            job = job_form.save(commit=False)
+            job.user = request.user
+            job.job_type = Job.MACHINIST
+            job.save()
+
+            req = req_form.save(commit=False)
+            req.job = job
+            req.save()
+
+            return redirect("employer_dashboard")
+    else:
+        job_form = JobForm()
+        req_form = MachinistJobRequirementForm()
+
+    return render(request, "JobFinder_app/create_job_machinist.html", {
+        "job_form": job_form,
+        "req_form": req_form,
+    })
+
+
+def create_job_software(request):
     if request.method == "POST":
         job_form = JobForm(request.POST)
         req1_form = JobRequirementOneForm(request.POST)
         req2_form = JobRequirementTwoForm(request.POST)
         req3_form = JobRequirementThreeForm(request.POST)
+        job.job_type = Job.SOFTWARE
 
         if job_form.is_valid() and req1_form.is_valid() and req2_form.is_valid() and req3_form.is_valid():
 
@@ -134,6 +167,10 @@ def create_job(request):
         "req2_form": req2_form,
         "req3_form": req3_form,
     })
+
+@login_required
+def create_job_choice(request):
+    return render(request, "JobFinder_app/create_job_choice.html")
 
 
 def match_seekers_for_job(job):
@@ -291,6 +328,34 @@ def seekerthree_view(request):
         form = SeekerFormThree()
         return render(request,'JobFinder_app/seekerexthree.html',context={'form': form})
     
+@login_required
+def machinist_experience_view(request):
+    try:
+        instance = MachinistExperience.objects.get(user=request.user)
+    except MachinistExperience.DoesNotExist:
+        instance = None
+
+    if request.method == "POST":
+        form = MachinistExperienceForm(request.POST, instance=instance)
+
+        if form.is_valid():
+            obj = form.save(commit=False)
+            obj.user = request.user
+            obj.save()
+
+            return redirect("seeker_dashboard")
+        else:
+            print("❌ FORM ERRORS:", form.errors)
+
+    else:
+        form = MachinistExperienceForm(instance=instance)
+
+    return render(request, "JobFinder_app/machinist_experience.html", {
+        "form": form
+    })
+
+
+
 def thanks_view(request):
     return render(request,'JobFinder_app/thanks.html')
 

@@ -3,7 +3,8 @@ from django import forms
 from django.contrib.auth.models import User
 from django.utils.safestring import mark_safe
 from django.forms import ModelForm
-from .models import ( SeekerModelOne, SeekerModelTwo, SeekerModelThree, Profile, Job, JobRequirementOne, JobRequirementTwo, JobRequirementThree, SeekerResume
+from .models import ( SeekerModelOne, SeekerModelTwo, SeekerModelThree, Profile, Job, JobRequirementOne, JobRequirementTwo, JobRequirementThree, SeekerResume,
+                     MachinistJobRequirement, MachinistExperience
                      
                       )
 from django.contrib.auth.models import User
@@ -54,6 +55,18 @@ class SeekerFormThree(ModelForm):
         #           'mongodb_experience','postgresql_experience'
         #           ]
 
+class MachinistExperienceForm(forms.ModelForm):
+    class Meta:
+        model = MachinistExperience
+        exclude = ("user",)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Make ALL fields optional
+        for field in self.fields.values():
+            field.required = False
+
+
 class JobForm(forms.ModelForm):
     class Meta:
         model = Job
@@ -81,6 +94,12 @@ class JobRequirementThreeForm(forms.ModelForm):
     class Meta:
         model = JobRequirementThree
         exclude = ("job",)
+
+class MachinistJobRequirementForm(forms.ModelForm):
+    class Meta:
+        model = MachinistJobRequirement
+        exclude = ("job",)
+
 
 class ResumeUploadForm(forms.ModelForm):
     class Meta:
