@@ -205,17 +205,17 @@ class MachinistJobRequirement(models.Model):
         related_name="machinist_requirements"
     )
 
-    years_experience = models.IntegerField(default=0)
-    blueprint_reading = models.IntegerField(default=0)
+    years_experience = models.IntegerField(null=True, blank=True)
+    blueprint_reading = models.IntegerField(null=True, blank=True)
 
-    cnc_milling = models.IntegerField(default=0)
-    cnc_turning = models.IntegerField(default=0)
+    cnc_milling = models.IntegerField(null=True, blank=True)
+    cnc_turning = models.IntegerField(null=True, blank=True)
 
-    manual_lathe = models.IntegerField(default=0)
-    manual_mill = models.IntegerField(default=0)
+    manual_lathe = models.IntegerField(null=True, blank=True)
+    manual_mill = models.IntegerField(null=True, blank=True)
 
-    welding = models.PositiveIntegerField(default=0)
-    fabrication = models.PositiveIntegerField(default=0)
+    welding = models.PositiveIntegerField(null=True, blank=True)
+    fabrication = models.PositiveIntegerField(null=True, blank=True)
 
 
 # ====================

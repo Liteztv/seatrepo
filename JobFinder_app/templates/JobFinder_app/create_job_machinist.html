@@ -1,0 +1,106 @@
+{% extends "JobFinder_app/base.html" %}
+{% block title %}Create Machinist Job – LiteSpeedJobs{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h2 class="mb-3">Create Machinist / Fabrication Job</h2>
+    <p class="dark-muted">
+        Define the experience requirements for this machinist position.
+        Only fields greater than 0 will be used for matching.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- JOB INFO -->
+        <div class="card mb-4">
+            <div class="card-header fw-bold">
+                Job Details
+            </div>
+            <div class="card-body">
+                {{ job_form.as_p }}
+            </div>
+        </div>
+
+        <!-- MACHINIST REQUIREMENTS -->
+        <div class="card mb-4">
+            <div class="card-header fw-bold">
+                <p class="dark-muted">Machinist Experience Requirements</p>
+            </div>
+            <div class="card-body">
+
+                <div class="row">
+                    <div class="col-md-6">
+                        
+                        {{ req_form.years_experience.label_tag }}
+                        {{ req_form.years_experience }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ req_form.blueprint_reading.label_tag }}
+                        {{ req_form.blueprint_reading }}
+                    </div>
+                </div>
+
+                <hr>
+                <p class="dark-muted">
+                CNC Experience
+                </p>
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ req_form.cnc_milling.label_tag }}
+                        {{ req_form.cnc_milling }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ req_form.cnc_turning.label_tag }}
+                        {{ req_form.cnc_turning }}
+                    </div>
+                </div>
+
+                <hr>
+                <p class="dark-muted">
+                Manual Machines
+                </p>
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ req_form.manual_lathe.label_tag }}
+                        {{ req_form.manual_lathe }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ req_form.manual_mill.label_tag }}
+                        {{ req_form.manual_mill }}
+                    </div>
+                </div>
+
+                <hr>
+                <p class="dark-muted">
+                Fabrication & Welding
+                </p>
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ machinist_form.welding.label_tag }}
+                        {{ machinist_form.welding }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ machinist_form.fabrication.label_tag }}
+                        {{ machinist_form.fabrication }}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-success">
+                Create Machinist Job
+            </button>
+
+            <a href="{% url 'employer_dashboard' %}" class="btn btn-secondary">
+                Cancel
+            </a>
+        </div>
+
+    </form>
+</div>
+{% endblock %}
