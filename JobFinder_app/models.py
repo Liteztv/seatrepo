@@ -119,6 +119,10 @@ class Job(models.Model):
     title = models.CharField(max_length=255)
     location = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True, default="No description provided.")
+    require_video_interview = models.BooleanField(
+       default=False,
+       help_text="Require candidates to submit video responses to interview questions" 
+    )
 
     interview_questions = models.TextField(
         blank=True,
@@ -253,6 +257,7 @@ class InterviewAssignment(models.Model):
     completed = models.BooleanField(default=False)
     employer_marked_hire = models.BooleanField(default=False)
     superuser_notified = models.BooleanField(default=False)
+    require_video = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Interview for {self.seeker.username} – {self.job.title}"
@@ -264,7 +269,8 @@ class InterviewResponse(models.Model):
     )
     seeker = models.ForeignKey(User, on_delete=models.CASCADE)
     question = models.TextField()
-    video = models.FileField(upload_to="interview_videos/")
+    test_answer = models.TextField(null=True, blank=True)
+    video = models.FileField(upload_to="interview_videos/", blank=True, null=True)
     submitted_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

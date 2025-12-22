@@ -18,13 +18,27 @@
 
         {% for q in questions %}
             <div class="mb-4">
-                <h5>Question {{ forloop.counter }}</h5>
-                <p>{{ q }}</p>
+                <label class="form-label"><strong>{{ q }}</strong></label>
 
-                <label class="form-label">Upload your video response:</label>
-                <input type="file" name="video_{{ forloop.counter0 }}" class="form-control" accept="video/*" required>
+                <textarea
+                    name="text_{{ forloop.counter0 }}"
+                    class="form-control mb-2"
+                    rows="4"
+                    placeholder="Type your answer here..."
+                    required
+                ></textarea>
+
+                {% if assignment.require_video %}
+                    <label class="form-label mt-2">Video Response (required)</label>
+                    <input
+                        type="file"
+                        name="video_{{ forloop.counter0 }}"
+                        accept="video/*"
+                        class="form-control"
+                        required
+                    >
+                {% endif %}
             </div>
-            <hr>
         {% endfor %}
 
         <button type="submit" class="btn btn-primary mt-3 w-100">

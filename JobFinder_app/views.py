@@ -489,7 +489,9 @@ def send_interview(request, job_id, seeker_id):
         job=job,
         employer=request.user,
         seeker=seeker,
-        defaults={"questions": job.interview_questions},
+        defaults={"questions": job.interview_questions,
+                  "require_video": job.require_video_interview,
+                  },
     )
 
     interview_link = request.build_absolute_uri(
@@ -560,33 +562,31 @@ def answer_interview(request, assignment_id):
     questions = [q.strip() for q in assignment.questions.splitlines() if q.strip()]
 
     if request.method == "POST":
-        # clear any existing responses for re-tries, if you want
         assignment.responses.all().delete()
 
         for idx, question in enumerate(questions):
-            file_key = f"video_{idx}"
-            video_file = request.FILES.get(file_key)
-            if video_file:
-                InterviewResponse.objects.create(
-                    assignment=assignment,
-                    seeker=request.user,
-                    question=question,
-                    video=video_file,
-                )
+            text_key = f"text_{idx}"
+            video_key = f"video_{idx}"
+
+            text_answer = request.POST.get(text_key, "").strip()
+            video_file = request.FILES.get(video_key)
+
+            if assignment.require_video and not video_file:
+                messages.error(request, "Video responses are required for this interview.")
+                return redirect("answer_interview", assignment_id=assignment.id)
+
+            InterviewResponse.objects.create(
+                assignment=assignment,
+                seeker=request.user,
+                question=question,
+                text_answer=text_answer,
+                video=video_file if assignment.require_video else None,
+            )
 
         assignment.completed = True
         assignment.save()
-
-        # notify employer in inbox
-        Message.objects.create(
-            sender=request.user,
-            receiver=assignment.employer,
-            subject=f"Interview Completed for {assignment.job.title}",
-            body="The candidate has completed their video interview.",
-            job=assignment.job,
-        )
-
         return redirect("inbox_pro")
+
 
     return render(request, "JobFinder_app/answer_interview.html", {
         "assignment": assignment,

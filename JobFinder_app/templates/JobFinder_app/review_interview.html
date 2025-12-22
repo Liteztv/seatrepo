@@ -19,13 +19,14 @@
                 <h5>Question</h5>
                 <p>{{ r.question }}</p>
 
-                <h5 class="dark-muted">Video Response</h5>
-
+                <p class="dark-muted"><strong>Answer:</strong></p>
+                <p class="dark-muted">{{ response.text_answer|linebreaks }}</p>
+                {% if response.video %}
                 <video controls preload="metadata" style="width:100%;max-height:400px;">
                     <source src="{{ r.video.url }}" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
-
+                {% endif %}
             </div>
         </div>
     {% empty %}
