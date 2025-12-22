@@ -20,7 +20,7 @@ from .models import ( SeekerModelOne, SeekerModelThree, SeekerModelTwo, Profile,
                      )
 
 from django.db import transaction
-from .utils import has_hire_access, has_interview_access, has_resume_access
+from .utils import has_hire_access, has_interview_access, has_resume_access, match_seekers_for_job
 from django.conf import settings
 
 def get_or_create_conversation(user1, user2, job=None):
@@ -173,48 +173,48 @@ def create_job_choice(request):
     return render(request, "JobFinder_app/create_job_choice.html")
 
 
-def match_seekers_for_job(job):
-    req1 = job.req_one
-    req2 = job.req_two
-    req3 = job.req_three
+# def match_seekers_for_job(job):
+#     req1 = job.req_one
+#     req2 = job.req_two
+#     req3 = job.req_three
 
-    seekers1 = SeekerModelOne.objects.all()
-    seekers2 = SeekerModelTwo.objects.all()
-    seekers3 = SeekerModelThree.objects.all()
+#     seekers1 = SeekerModelOne.objects.all()
+#     seekers2 = SeekerModelTwo.objects.all()
+#     seekers3 = SeekerModelThree.objects.all()
 
-    # Req1
-    filters_1 = {}
-    for field in ["total_years_of_experience", "html_experience", "css_experience"]:
-        val = getattr(req1, field)
-        if val and val > 0:
-            filters_1[f"{field}__gte"] = val
-    seekers1 = seekers1.filter(**filters_1)
+#     # Req1
+#     filters_1 = {}
+#     for field in ["total_years_of_experience", "html_experience", "css_experience"]:
+#         val = getattr(req1, field)
+#         if val and val > 0:
+#             filters_1[f"{field}__gte"] = val
+#     seekers1 = seekers1.filter(**filters_1)
 
-    # Req2
-    fields2 = ["python_experience","java_experience","javascript_experience","cplusplus_experience","csharp_experience","ruby_experience"]
-    filters_2 = {}
-    for field in fields2:
-        val = getattr(req2, field)
-        if val and val > 0:
-            filters_2[f"{field}__gte"] = val
-    seekers2 = seekers2.filter(**filters_2)
+#     # Req2
+#     fields2 = ["python_experience","java_experience","javascript_experience","cplusplus_experience","csharp_experience","ruby_experience"]
+#     filters_2 = {}
+#     for field in fields2:
+#         val = getattr(req2, field)
+#         if val and val > 0:
+#             filters_2[f"{field}__gte"] = val
+#     seekers2 = seekers2.filter(**filters_2)
 
-    # Req3
-    fields3 = [f.name for f in JobRequirementThree._meta.fields if f.name not in ("id", "job")]
-    filters_3 = {}
-    for field in fields3:
-        val = getattr(req3, field)
-        if val and val > 0:
-            filters_3[f"{field}__gte"] = val
-    seekers3 = seekers3.filter(**filters_3)
+#     # Req3
+#     fields3 = [f.name for f in JobRequirementThree._meta.fields if f.name not in ("id", "job")]
+#     filters_3 = {}
+#     for field in fields3:
+#         val = getattr(req3, field)
+#         if val and val > 0:
+#             filters_3[f"{field}__gte"] = val
+#     seekers3 = seekers3.filter(**filters_3)
 
-    ids = (
-        set(seekers1.values_list("user", flat=True)) &
-        set(seekers2.values_list("user", flat=True)) &
-        set(seekers3.values_list("user", flat=True))
-    )
+#     ids = (
+#         set(seekers1.values_list("user", flat=True)) &
+#         set(seekers2.values_list("user", flat=True)) &
+#         set(seekers3.values_list("user", flat=True))
+#     )
 
-    return User.objects.filter(id__in=ids)
+#     return User.objects.filter(id__in=ids)
 
 
 def employer_dashboard(request):

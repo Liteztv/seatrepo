@@ -1,5 +1,7 @@
 # liteapp/utils.py (create this file)
-from .models import Profile, Conversation, EmployerAccess, Job
+from .models import ( Profile, Conversation, EmployerAccess, Job, SeekerModelOne, SeekerModelThree, SeekerModelTwo,
+                     MachinistExperience
+                     )
 from django.conf import settings
 from django.contrib.auth.models import User
 
@@ -74,12 +76,87 @@ def has_hire_access(employer, seeker, job):
     ).exists()
 
 def match_software_seekers(job):
-    # uses SeekerModelOne/Two/Three
-    pass
+    
+    try:
+        req1 = job.req_one
+        req2 = job.req_two
+        req3 = job.req_three
+    except Exception:
+        return User.objects.none()
+
+    seekers1 = SeekerModelOne.objects.all()
+    seekers2 = SeekerModelTwo.objects.all()
+    seekers3 = SeekerModelThree.objects.all()
+
+    # Req1
+    filters_1 = {
+        f"{field}__gte": getattr(req1, field)
+        for field in ["total_years_of_experience", "html_experience", "css_experience"]
+        if getattr(req1, field) and getattr(req1, field) > 0
+    }
+    seekers1 = seekers1.filter(**filters_1)
+
+    # Req2
+    fields2 = [
+        "python_experience", "java_experience", "javascript_experience",
+        "cplusplus_experience", "csharp_experience", "ruby_experience"
+    ]
+    filters_2 = {
+        f"{field}__gte": getattr(req2, field)
+        for field in fields2
+        if getattr(req2, field) and getattr(req2, field) > 0
+    }
+    seekers2 = seekers2.filter(**filters_2)
+
+    # Req3
+    fields3 = [
+        f.name for f in req3._meta.fields
+        if f.name not in ("id", "job")
+    ]
+    filters_3 = {
+        f"{field}__gte": getattr(req3, field)
+        for field in fields3
+        if getattr(req3, field) and getattr(req3, field) > 0
+    }
+    seekers3 = seekers3.filter(**filters_3)
+
+    ids = (
+        set(seekers1.values_list("user_id", flat=True)) &
+        set(seekers2.values_list("user_id", flat=True)) &
+        set(seekers3.values_list("user_id", flat=True))
+    )
+
+    return User.objects.filter(id__in=ids)
+
 
 def match_machinist_seekers(job):
-    # uses MachinistExperience
-    pass
+    try:
+        req = job.machinist_requirements
+    except Exception:
+        return User.objects.none()
+
+    qs = MachinistExperience.objects.all()
+
+    filters = {
+        f"{field}__gte": getattr(req, field)
+        for field in [
+            "years_experience",
+            "cnc_milling",
+            "cnc_turning",
+            "manual_lathe",
+            "manual_mill",
+            "welding",
+            "fabrication",
+        ]
+        if getattr(req, field) and getattr(req, field) > 0
+    }
+
+    qs = qs.filter(**filters)
+
+    return User.objects.filter(
+        id__in=qs.values_list("user_id", flat=True)
+    )
+
 
 def match_seekers_for_job(job):
     if job.job_type == Job.SOFTWARE:
