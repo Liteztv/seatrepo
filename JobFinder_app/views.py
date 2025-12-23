@@ -173,6 +173,49 @@ def create_job_choice(request):
     return render(request, "JobFinder_app/create_job_choice.html")
 
 
+# def match_seekers_for_job(job):
+#     req1 = job.req_one
+#     req2 = job.req_two
+#     req3 = job.req_three
+
+#     seekers1 = SeekerModelOne.objects.all()
+#     seekers2 = SeekerModelTwo.objects.all()
+#     seekers3 = SeekerModelThree.objects.all()
+
+#     # Req1
+#     filters_1 = {}
+#     for field in ["total_years_of_experience", "html_experience", "css_experience"]:
+#         val = getattr(req1, field)
+#         if val and val > 0:
+#             filters_1[f"{field}__gte"] = val
+#     seekers1 = seekers1.filter(**filters_1)
+
+#     # Req2
+#     fields2 = ["python_experience","java_experience","javascript_experience","cplusplus_experience","csharp_experience","ruby_experience"]
+#     filters_2 = {}
+#     for field in fields2:
+#         val = getattr(req2, field)
+#         if val and val > 0:
+#             filters_2[f"{field}__gte"] = val
+#     seekers2 = seekers2.filter(**filters_2)
+
+#     # Req3
+#     fields3 = [f.name for f in JobRequirementThree._meta.fields if f.name not in ("id", "job")]
+#     filters_3 = {}
+#     for field in fields3:
+#         val = getattr(req3, field)
+#         if val and val > 0:
+#             filters_3[f"{field}__gte"] = val
+#     seekers3 = seekers3.filter(**filters_3)
+
+#     ids = (
+#         set(seekers1.values_list("user", flat=True)) &
+#         set(seekers2.values_list("user", flat=True)) &
+#         set(seekers3.values_list("user", flat=True))
+#     )
+
+#     return User.objects.filter(id__in=ids)
+
 
 def employer_dashboard(request):
     jobs = Job.objects.filter(user=request.user).order_by("-created_at")
@@ -489,9 +532,7 @@ def send_interview(request, job_id, seeker_id):
         job=job,
         employer=request.user,
         seeker=seeker,
-        defaults={"questions": job.interview_questions,
-                  "require_video": job.require_video_interview,
-                  },
+        defaults={"questions": job.interview_questions},
     )
 
     interview_link = request.build_absolute_uri(
@@ -505,7 +546,7 @@ def send_interview(request, job_id, seeker_id):
         receiver=seeker,
         subject=f"Interview for {job.title}",
         body=f"You have been invited to complete a video interview.\n\n"
-            f"Click here to begin:\n{interview_link}",
+            f"Click here to begin:\n{interview_link}l",
         job=job,
     )
 
@@ -562,32 +603,34 @@ def answer_interview(request, assignment_id):
     questions = [q.strip() for q in assignment.questions.splitlines() if q.strip()]
 
     if request.method == "POST":
+        # clear any existing responses for re-tries, if you want
         assignment.responses.all().delete()
 
         for idx, question in enumerate(questions):
-            text_key = f"text_{idx}"
-            video_key = f"video_{idx}"
-
-            text_answer = request.POST.get(text_key, "").strip()
-            video_file = request.FILES.get(video_key)
-
-            if assignment.require_video and not video_file:
-                messages.error(request, "Video responses are required for this interview.")
-                return redirect("answer_interview", assignment_id=assignment.id)
-
-            InterviewResponse.objects.create(
-                assignment=assignment,
-                seeker=request.user,
-                question=question,
-                text_answer=text_answer,
-                video=video_file if assignment.require_video else None,
-            )
+            file_key = f"video_{idx}"
+            video_file = request.FILES.get(file_key)
+            if video_file:
+                InterviewResponse.objects.create(
+                    assignment=assignment,
+                    seeker=request.user,
+                    question=question,
+                    video=video_file,
+                )
 
         assignment.completed = True
         assignment.save()
+
+        # notify employer in inbox
+        Message.objects.create(
+            sender=request.user,
+            receiver=assignment.employer,
+            subject=f"Interview Completed for {assignment.job.title}",
+            body="The candidate has completed their video interview.",
+            job=assignment.job,
+        )
+
         return redirect("inbox_pro")
-
-
+    
     return render(request, "JobFinder_app/answer_interview.html", {
         "assignment": assignment,
         "questions": questions,
@@ -945,49 +988,74 @@ def purchase_hire_access(request, job_id, seeker_id):
     messages.success(request, "Hire access unlocked.")
     return redirect("employer_dashboard")
 
+
 @login_required
 def candidate_summary(request, job_id, seeker_id):
-    """
-    Employer-only anonymous candidate skill summary.
-    Shows only skills with > 0 experience.
-    """
+    job = get_object_or_404(Job, id=job_id)
+    seeker = get_object_or_404(User, id=seeker_id)
 
-    # ✅ Ensure job belongs to employer
-    job = get_object_or_404(Job, id=job_id, user=request.user)
-
-    # ✅ Fetch seeker experience models safely
-    sm1 = SeekerModelOne.objects.filter(user_id=seeker_id).first()
-    sm2 = SeekerModelTwo.objects.filter(user_id=seeker_id).first()
-    sm3 = SeekerModelThree.objects.filter(user_id=seeker_id).first()
-
-    if not any([sm1, sm2, sm3]):
-        raise Http404("Candidate data not found")
-
-    skills = []
-
-    def extract_skills(instance, exclude=("id", "user", "first_name", "last_name")):
-        if not instance:
-            return
-        for field in instance._meta.fields:
-            name = field.name
-            if name in exclude:
-                continue
-            value = getattr(instance, name)
-            if isinstance(value, int) and value > 0:
-                skills.append({
-                    "name": name.replace("_", " ").title(),
-                    "years": value,
-                })
-
-    extract_skills(sm1)
-    extract_skills(sm2)
-    extract_skills(sm3)
-
-    total_years = sm1.total_years_of_experience if sm1 else None
-
-    return render(request, "JobFinder_app/candidate_summary.html", {
+    context = {
         "job": job,
-        "seeker_id": seeker_id,
-        "total_years": total_years,
-        "skills": skills,
-    })
+        "seeker": seeker,
+        "job_type": job.job_type,  # 👈 make template logic cleaner
+    }
+
+    if job.job_type == Job.SOFTWARE:
+        context.update({
+            "exp1": SeekerModelOne.objects.filter(user=seeker).first(),
+            "exp2": SeekerModelTwo.objects.filter(user=seeker).first(),
+            "exp3": SeekerModelThree.objects.filter(user=seeker).first(),
+        })
+
+    elif job.job_type == Job.MACHINIST:
+        context["machinist"] = MachinistExperience.objects.filter(user=seeker).first()
+
+    return render(request, "JobFinder_app/candidate_summary.html", context)
+
+
+# @login_required
+# def candidate_summary(request, job_id, seeker_id):
+#     """
+#     Employer-only anonymous candidate skill summary.
+#     Shows only skills with > 0 experience.
+#     """
+
+#     # ✅ Ensure job belongs to employer
+#     job = get_object_or_404(Job, id=job_id, user=request.user)
+
+#     # ✅ Fetch seeker experience models safely
+#     sm1 = SeekerModelOne.objects.filter(user_id=seeker_id).first()
+#     sm2 = SeekerModelTwo.objects.filter(user_id=seeker_id).first()
+#     sm3 = SeekerModelThree.objects.filter(user_id=seeker_id).first()
+
+#     if not any([sm1, sm2, sm3]):
+#         raise Http404("Candidate data not found")
+
+#     skills = []
+
+#     def extract_skills(instance, exclude=("id", "user", "first_name", "last_name")):
+#         if not instance:
+#             return
+#         for field in instance._meta.fields:
+#             name = field.name
+#             if name in exclude:
+#                 continue
+#             value = getattr(instance, name)
+#             if isinstance(value, int) and value > 0:
+#                 skills.append({
+#                     "name": name.replace("_", " ").title(),
+#                     "years": value,
+#                 })
+
+#     extract_skills(sm1)
+#     extract_skills(sm2)
+#     extract_skills(sm3)
+
+#     total_years = sm1.total_years_of_experience if sm1 else None
+
+#     return render(request, "JobFinder_app/candidate_summary.html", {
+#         "job": job,
+#         "seeker_id": seeker_id,
+#         "total_years": total_years,
+#         "skills": skills,
+#     })

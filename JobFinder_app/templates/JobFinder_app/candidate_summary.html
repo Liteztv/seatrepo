@@ -15,36 +15,174 @@
 
             <h3 class="mb-2">Candidate Profile</h3>
 
-            <p class="text-muted mb-3">
+            <p class="dark-muted mb-3">
                 Anonymous candidate matched for <strong>{{ job.title }}</strong>
             </p>
 
-            {% if total_years %}
-                <p>
-                    <strong>Total Experience:</strong>
-                    {{ total_years }} years
-                </p>
+            {% if job_type == "software" %}
+
+                <h4 class="mt-3">Software Engineering Experience</h4>
+
+                {% if exp1 or exp2 or exp3 %}
+                    <ul class="list-group mt-3">
+
+                        {% if exp1 %}
+                            {% if exp1.total_years_of_experience %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Total Experience
+                                    <span class="badge bg-primary">
+                                        {{ exp1.total_years_of_experience }} yrs
+                                    </span>
+                                </li>
+                            {% endif %}
+                            {% if exp1.html_experience %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    HTML
+                                    <span class="badge bg-primary">
+                                        {{ exp1.html_experience }} yrs
+                                    </span>
+                                </li>
+                            {% endif %}
+                            {% if exp1.css_experience %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    CSS
+                                    <span class="badge bg-primary">
+                                        {{ exp1.css_experience }} yrs
+                                    </span>
+                                </li>
+                            {% endif %}
+                        {% endif %}
+
+                        {% if exp2 %}
+                            {% if exp2.python_experience %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Python
+                                    <span class="badge bg-primary">
+                                        {{ exp2.python_experience }} yrs
+                                    </span>
+                                </li>
+                            {% endif %}
+                            {% if exp2.javascript_experience %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    JavaScript
+                                    <span class="badge bg-primary">
+                                        {{ exp2.javascript_experience }} yrs
+                                    </span>
+                                </li>
+                            {% endif %}
+                        {% endif %}
+
+                        {% if exp3 %}
+                            {% if exp3.django_experience %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Django
+                                    <span class="badge bg-primary">
+                                        {{ exp3.django_experience }} yrs
+                                    </span>
+                                </li>
+                            {% endif %}
+                            {% if exp3.react_experience %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    React
+                                    <span class="badge bg-primary">
+                                        {{ exp3.react_experience }} yrs
+                                    </span>
+                                </li>
+                            {% endif %}
+                        {% endif %}
+
+                    </ul>
+                {% else %}
+                    <p class="dark-muted">No software experience submitted.</p>
             {% endif %}
 
-            <hr>
+            {% elif job_type == "machinist" %}
 
-            <h5>Relevant Skills</h5>
+                <h4 class="mt-3">Machinist / Fabrication Experience</h4>
 
-            {% if skills %}
-                <ul class="list-group mt-3">
-                    {% for s in skills %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            {{ s.name }}
-                            <span class="badge bg-primary">
-                                {{ s.years }} yrs
-                            </span>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p class="text-muted">No relevant skills listed.</p>
+                {% if machinist %}
+                    <ul class="list-group mt-3">
+
+                        {% if machinist.years_experience %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Total Experience
+                                <span class="badge bg-primary">
+                                    {{ machinist.years_experience }} yrs
+                                </span>
+                            </li>
+                        {% endif %}
+
+                        {% if machinist.blueprint_reading %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Blueprint Reading
+                                <span class="badge bg-primary">
+                                    {{ machinist.blueprint_reading }} yrs
+                                </span>
+                            </li>
+                        {% endif %}
+
+                        {% if machinist.cnc_milling %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                CNC Milling
+                                <span class="badge bg-primary">
+                                    {{ machinist.cnc_milling }} yrs
+                                </span>
+                            </li>
+                        {% endif %}
+
+                        {% if machinist.cnc_turning %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                CNC Turning
+                                <span class="badge bg-primary">
+                                    {{ machinist.cnc_turning }} yrs
+                                </span>
+                            </li>
+                        {% endif %}
+
+                        {% if machinist.manual_lathe %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Manual Lathe
+                                <span class="badge bg-primary">
+                                    {{ machinist.manual_lathe }} yrs
+                                </span>
+                            </li>
+                        {% endif %}
+
+                        {% if machinist.manual_mill %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Manual Mill
+                                <span class="badge bg-primary">
+                                    {{ machinist.manual_mill }} yrs
+                                </span>
+                            </li>
+                        {% endif %}
+
+                        {% if machinist.welding %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Welding
+                                <span class="badge bg-primary">
+                                    {{ machinist.welding }} yrs
+                                </span>
+                            </li>
+                        {% endif %}
+
+                        {% if machinist.fabrication %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Fabrication
+                                <span class="badge bg-primary">
+                                    {{ machinist.fabrication }} yrs
+                                </span>
+                            </li>
+                        {% endif %}
+
+                    </ul>
+                {% else %}
+                    <p class="dark-muted">No machinist experience submitted.</p>
+                {% endif %}
+
             {% endif %}
 
+            
         </div>
     </div>
 
