@@ -13,7 +13,8 @@
         </a>
     </div>
 
-    <!-- Profile Box -->
+    <!-- Profile Box --> 
+     <!-- secondary button styling : btn btn-primary mt-2 -->
     <div class="card shadow mb-4">
         <div class="card-body">
             <h4>Your Profile</h4>
@@ -22,14 +23,14 @@
             <p><strong>Username:</strong> {{ request.user.username }}</p>
             <p><strong>Email:</strong> {{ request.user.email }}</p>
 
-            <a href="{% url 'seeker_form1' %}" class="btn btn-primary mt-2">
-                <i class="bi bi-pencil"></i> Edit Experience
+            <a href="{% url 'seeker_form1' %}" class="btn btn-outline-primary">
+                <i class="bi bi-pencil"></i> Software Engineering Experience
             </a>
             <a href="{% url 'machinist_experience' %}" class="btn btn-outline-primary">
-                Machinist / Welding Experience
+               <i class="bi bi-pencil"></i> Machinist / Welding Experience
             </a>
 
-            <p><a href="{% url 'upload_resume' %}" class="btn btn-primary mt-2">
+            <p><a href="{% url 'upload_resume' %}" class="btn btn-outline-primary">
                     Upload / Update Resume
                 </a>
             </p>
@@ -65,7 +66,7 @@
                     {% endfor %}
                 </ul>
             {% else %}
-                <p class="text-muted">No interview assignments yet.</p>
+                <p class="dark-muted">No interview assignments yet.</p>
             {% endif %}
         </div>
     </div>

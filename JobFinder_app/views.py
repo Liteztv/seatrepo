@@ -133,7 +133,7 @@ def create_job_software(request):
         req1_form = JobRequirementOneForm(request.POST)
         req2_form = JobRequirementTwoForm(request.POST)
         req3_form = JobRequirementThreeForm(request.POST)
-        job.job_type = Job.SOFTWARE
+        
 
         if job_form.is_valid() and req1_form.is_valid() and req2_form.is_valid() and req3_form.is_valid():
 
