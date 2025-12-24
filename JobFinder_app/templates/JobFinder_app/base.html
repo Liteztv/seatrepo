@@ -382,15 +382,16 @@ document.addEventListener("DOMContentLoaded", function () {
         </li>
         {% if user.is_authenticated %}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         
-        <li class="nav-item position-relative">
-            <a href="{% url 'inbox_pro' %}" class="nav-link">
-                <i class="bi bi-inbox"></i>
-
-                {% if unread_count > 0 %}
-                    <span class="badge bg-danger">{{ unread_count }}</span>
-                {% endif %}
-
-            </a>
+        <a href="{% url 'inbox_pro' %}" class="nav-link">Inbox</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        
+        <a href="{% url 'inbox_pro' %}" class="nav-link position-relative">
+            <i class="bi bi-inbox"></i>
+            <span id="unreadBadge"
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+                style="display: none;">
+                {{ unread_count }}
+            </span>
+        </a>
         </li>
         {% else %}
         <li class="nav-item">
@@ -486,6 +487,25 @@ var tooltipTriggerList = [].slice.call(
 );
 tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
 </script>
+<script>
+function updateUnreadBadge() {
+    fetch("{% url 'unread_count_api' %}")
+        .then(res => res.json())
+        .then(data => {
+            const badge = document.getElementById("unreadBadge");
+            if (!badge) return;
 
+            if (data.unread > 0) {
+                badge.textContent = data.unread;
+                badge.style.display = "inline-block";
+            } else {
+                badge.style.display = "none";
+            }
+        });
+}
+
+// Poll every 10 seconds
+setInterval(updateUnreadBadge, 10000);
+</script>
 </body>
 </html>

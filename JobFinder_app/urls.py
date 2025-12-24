@@ -125,6 +125,7 @@ urlpatterns = [
     path("create-job/", views.create_job_select_type, name="create_job"),
     path("jobs/create/software/", views.create_job_software, name="create_job_software"),
     path("jobs/create/machinist/", views.create_job_machinist, name="create_job_machinist"),
+    path("api/unread-count/", views.unread_count_api, name="unread_count_api"),
 
 ]
 

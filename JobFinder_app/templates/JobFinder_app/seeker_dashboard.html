@@ -78,20 +78,18 @@
             <hr>
 
             {% if messages %}
-                <ul class="list-group">
-                    {% for m in messages %}
-                        <li class="list-group-item">
-                            <strong>{{ m.subject }}</strong><br>
-                            <small class="dark-muted">From {{ m.sender.username }} • {{ m.created_at }}</small>
-
-                            {% if m.body %}
-                                <p class="mt-2 mb-0">{{ m.body }}</p>
-                            {% endif %}
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p class="text-muted">Your inbox is empty.</p>
+                <div class="alert alert-info">
+                    <strong>New Messages</strong>
+                    <ul class="mt-2">
+                        {% for msg in messages %}
+                            <li>
+                                <a href="{% url 'inbox_pro' %}?c={{ msg.conversation.id }}">
+                                    {{ msg.subject }}
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
             {% endif %}
         </div>
     </div>

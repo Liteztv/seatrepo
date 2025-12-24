@@ -1,5 +1,5 @@
 from django.urls import reverse
-from django.http import FileResponse, Http404
+from django.http import FileResponse, Http404, JsonResponse
 from django.contrib import messages
 from django.shortcuts import render,redirect, get_object_or_404
 from django.db.models import Q
@@ -283,8 +283,14 @@ def employer_dashboard(request):
     })
 
 def seeker_dashboard(request):
-    assignments = InterviewAssignment.objects.filter(seeker=request.user).order_by("-assigned_at")
-    messages = Message.objects.filter(receiver=request.user).order_by("-created_at")
+    assignments = InterviewAssignment.objects.filter(
+        seeker=request.user
+    ).order_by("-assigned_at")
+
+    messages = Message.objects.filter(
+        receiver=request.user,
+        is_read=False
+    ).order_by("-created_at")
 
     return render(request, "JobFinder_app/seeker_dashboard.html", {
         "assignments": assignments,
@@ -1011,6 +1017,15 @@ def candidate_summary(request, job_id, seeker_id):
         context["machinist"] = MachinistExperience.objects.filter(user=seeker).first()
 
     return render(request, "JobFinder_app/candidate_summary.html", context)
+
+@login_required
+def unread_count_api(request):
+    count = Message.objects.filter(
+        receiver=request.user,
+        is_read=False
+    ).count()
+
+    return JsonResponse({"unread": count})
 
 
 # @login_required
