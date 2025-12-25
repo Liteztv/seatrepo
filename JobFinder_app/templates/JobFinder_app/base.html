@@ -531,12 +531,16 @@ document.addEventListener("DOMContentLoaded", function () {
         
         <a href="{% url 'inbox_pro' %}" class="nav-link position-relative">
             <i class="bi bi-inbox"></i>
-            <span id="unreadBadge"
-                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
-                style="display: none;">
-                {{ unread_count }}
-            </span>
+
+            {% if unread_count and unread_count > 0 %}
+                <span id="unreadBadge"
+                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    {{ unread_count }}
+                </span>
+            {% endif %}
         </a>
+
+        
         </li>
         {% else %}
         <li class="nav-item">
@@ -650,8 +654,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 </script>
-<span id="inboxBadge"
-      class="badge bg-danger d-none">
-</span>
+
 </body>
 </html>
