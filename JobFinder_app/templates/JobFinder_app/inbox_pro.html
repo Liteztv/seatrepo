@@ -23,6 +23,7 @@
         border-bottom: 1px solid var(--ls-border);
         cursor: pointer;
         transition: background 0.2s ease;
+        color: var(--ls-text)
     }
     .conversation-item:hover {
         background-color: rgba(0, 0, 0, 0.04);
@@ -39,13 +40,15 @@
         width: 70%;
         display: flex;
         flex-direction: column;
-        background-color: var(--ls-bg);
+        background-color: var(--chat-bg);
+        color: var(--chat-text);
     }
 
     .chat-messages {
         flex-grow: 1;
         overflow-y: auto;
         padding: 15px;
+        background-color: var(--chat-panel-bg);
     }
 
     .message-bubble {
@@ -53,33 +56,42 @@
         padding: 10px 14px;
         margin-bottom: 12px;
         border-radius: 12px;
+        color: var(--ls-text);
     }
     .sent {
-        background-color: var(--ls-primary);
-        color: #000;
+        background-color: var(--bubble-sent-bg);
+        color: var(--bubble-sent-text);
         margin-left: auto;
     }
     .received {
-        background-color: var(--ls-bg-card);
-        border: 1px solid var(--ls-border);
+        background-color: var(--chat-panel-bg);
+        border: 1px solid var(--chat-border);
+        color: var(--bubble-text-received);
     }
-
     .chat-input {
-        padding: 10px 12px;
-        border-top: 1px solid var(--ls-border);
-        background-color: var(--ls-bg-card);
+        background-color: var(--chat-panel-bg);
+        border-top: 1px solid var(--chat-border);
     }
 
     .drop-zone {
-        border: 1px dashed var(--ls-border);
+        border: 1px dashed var(--chat-border);
         border-radius: 8px;
         padding: 8px;
         text-align: center;
         margin-top: 6px;
         font-size: 0.85rem;
+        color: var(--chat-muted);
     }
     .drop-zone.dragover {
         background-color: rgba(77, 171, 247, 0.1);
+    }
+    body.dark-mode .sent {
+        color: #020617; /* even darker for readability */
+    }
+
+    .received {
+        background-color: var(--ls-bg-card);
+        border: 1px solid var(--ls-border);
     }
 </style>
 
@@ -94,7 +106,7 @@
                 <a href="?c={{ convo.id }}" class="text-decoration-none text-reset">
                     <div class="conversation-item {% if active_conversation and active_conversation.id == convo.id %}active{% endif %}">
                         <strong>{{ other.username }}</strong><br>
-                        <small class="text-muted">
+                        <small class="dark-muted">
                             {% with last=convo.messages.last %}
                                 {% if last %}
                                     {{ last.body|default:"(attachment)"|truncatechars:40 }}
@@ -131,7 +143,7 @@
                             {% endif %}
                         {% endif %}
 
-                        <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">
+                        <small class="message-meta d-block mt-1" style="font-size: 0.75rem;">
                             {{ msg.sender.username }} • {{ msg.created_at|date:"M d, H:i" }}
                         </small>
                     </div>

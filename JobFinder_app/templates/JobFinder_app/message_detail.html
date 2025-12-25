@@ -12,7 +12,7 @@
         <div class="card-body">
 
             <h3>{{ msg.subject }}</h3>
-            <p class="text-muted">
+            <p class="dark-muted">
                 From {{ msg.sender.username }} • {{ msg.created_at|date:"M d, Y h:i A" }}
             </p>
 
@@ -22,7 +22,7 @@
 
             {% if msg.job %}
                 <hr>
-                <p class="text-muted">Regarding Job: <strong>{{ msg.job.title }}</strong></p>
+                <p class="dark-muted">Regarding Job: <strong>{{ msg.job.title }}</strong></p>
             {% endif %}
 
         </div>

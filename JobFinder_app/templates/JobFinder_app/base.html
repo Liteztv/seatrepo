@@ -26,6 +26,18 @@
 
             --ls-icon-color: #f1f3f5;
 
+            --chat-bg: #ffffff;
+            --chat-panel-bg: #f8f9fa;
+            --chat-border: #dee2e6;
+            --chat-text: #212529;
+            --chat-muted: #6c757d;
+
+            --bubble-sent-bg: #0d6efd;
+            --bubble-sent-text: #ffffff;
+
+            --bubble-received-bg: #e9ecef;
+            --bubble-received-text: #212529;
+
             /* BRAND COLOR */
             --ls-primary: #4dabf7;
 
@@ -49,6 +61,24 @@
             
             background-color: var(--ls-dark-bg);
             color: var(--ls-dark-text);
+            /* Rebind global variables */
+            --ls-bg: var(--ls-dark-bg);
+            --ls-bg-card: var(--ls-dark-bg-card);
+            --ls-border: var(--ls-dark-border);
+            --ls-text: var(--ls-dark-text);
+            --ls-text-muted: var(--ls-dark-muted);
+            --chat-bg: #0f172a;              /* deep slate */
+            --chat-panel-bg: #020617;        /* almost black */
+            --chat-border: #1e293b;
+            --chat-text: #e5e7eb;
+            --chat-muted: #94a3b8;
+
+            --bubble-sent-bg: #2563eb;
+            --bubble-sent-text: #ffffff;
+
+            --bubble-received-bg: #1e293b;
+            --bubble-received-text: #e5e7eb;
+
             
         }
 
@@ -187,11 +217,18 @@
 
         .bi-gear-fill {
             transition: transform 0.3s ease;
-}
+        }
 
         .bi-gear-fill:hover {
             transform: rotate(90deg);
-}
+        }
+        .message-meta {
+            color: var(--ls-text-muted);
+        }
+
+        body.dark-mode .message-meta {
+            color: var(--ls-dark-muted);
+        }
 
         /* ===========================
         ALERTS
@@ -235,6 +272,96 @@
             background-color: var(--ls-primary) !important;
             color: #000 !important;
             border-color: var(--ls-primary) !important;
+        }
+
+        /* Messaging layout */
+        
+        .inbox-container {
+            background: var(--chat-bg);
+            border: 1px solid var(--chat-border);
+        }
+
+        .conversation-list {
+            background: var(--chat-panel-bg);
+            border-right: 1px solid var(--chat-border);
+        }
+
+        .chat-window {
+            background: var(--chat-bg);
+            color: var(--chat-text);
+        }
+
+        .chat-messages {
+            background: var(--chat-bg);
+            color: var(--chat-text);
+        }
+
+        /* Conversation item */
+        .conversation-item {
+            background-color: transparent;
+            color: var(--ls-text);
+        }
+
+        .conversation-item:hover {
+            background-color: rgba(77, 171, 247, 0.12);
+        }
+
+        body.dark-mode .conversation-item:hover {
+            background-color: rgba(255, 255, 255, 0.06);
+        }
+
+        .conversation-item.active {
+            background-color: rgba(77, 171, 247, 0.18);
+        }
+
+        
+
+        /* Message bubbles */
+        
+
+        body.dark-mode .message-bubble.sent {
+            background-color: #60a5fa;
+            color: #020617;
+        }
+
+        
+
+        /* Input area */
+        
+        .chat-window a {
+            color: #4dabf7;
+        }
+
+        body.dark-mode .chat-window a {
+            color: #93c5fd;
+        }
+
+        .message-bubble {
+            max-width: 75%;
+            padding: 10px 14px;
+            margin-bottom: 12px;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .message-bubble.sent {
+            background: var(--bubble-sent-bg);
+            color: var(--bubble-sent-text);
+            margin-left: auto;
+        }
+
+        .message-bubble.received {
+            background: var(--bubble-received-bg);
+            color: var(--bubble-received-text);
+            border: 1px solid var(--chat-border);
+        }
+        .message-bubble small {
+            color: var(--ls-dark-muted);
+        }
+
+        .message-bubble small {
+            color: var(--chat-muted);
         }
         </style>
 
