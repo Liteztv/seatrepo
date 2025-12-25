@@ -230,6 +230,8 @@
             color: var(--ls-dark-muted);
         }
 
+        
+
         /* ===========================
         ALERTS
         =========================== */
@@ -363,6 +365,22 @@
         .message-bubble small {
             color: var(--chat-muted);
         }
+        .btn-unlock {
+        color: #111 !important;
+        font-weight: 600;
+        }
+
+        /* Keep it dark on hover/focus too */
+        .btn-unlock:hover,
+        .btn-unlock:focus {
+        color: #111 !important;
+        }
+
+        /* If you use icons inside */
+        .btn-unlock i {
+        color: #111 !important;
+        }
+
         </style>
 
         <!-- <style>
@@ -609,30 +627,31 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 </script>
 <script>
-var tooltipTriggerList = [].slice.call(
-    document.querySelectorAll('[data-bs-toggle="tooltip"]')
-);
-tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
-</script>
-<script>
-function updateUnreadBadge() {
-    fetch("{% url 'unread_count_api' %}")
-        .then(res => res.json())
-        .then(data => {
-            const badge = document.getElementById("unreadBadge");
-            if (!badge) return;
+document.addEventListener("DOMContentLoaded", () => {
+    const badge = document.getElementById("inboxBadge");
+    if (!badge) return;
 
-            if (data.unread > 0) {
-                badge.textContent = data.unread;
-                badge.style.display = "inline-block";
-            } else {
-                badge.style.display = "none";
-            }
-        });
-}
-
-// Poll every 10 seconds
-setInterval(updateUnreadBadge, 10000);
+    fetch("{% url 'unread_count_api' %}", {
+        headers: {
+            "X-Requested-With": "XMLHttpRequest"
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.count > 0) {
+            badge.textContent = data.count;
+            badge.classList.remove("d-none");
+        } else {
+            badge.classList.add("d-none");
+        }
+    })
+    .catch(err => {
+        console.error("Unread count fetch failed", err);
+    });
+});
 </script>
+<span id="inboxBadge"
+      class="badge bg-danger d-none">
+</span>
 </body>
 </html>

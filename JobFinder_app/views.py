@@ -20,7 +20,7 @@ from .models import ( SeekerModelOne, SeekerModelThree, SeekerModelTwo, Profile,
                      )
 
 from django.db import transaction
-from .utils import has_hire_access, has_interview_access, has_resume_access, match_seekers_for_job
+from .utils import has_hire_access, has_interview_access, has_resume_access, match_seekers_for_job, calculate_match_percentage
 from django.conf import settings
 
 def get_or_create_conversation(user1, user2, job=None):
@@ -248,10 +248,12 @@ def employer_dashboard(request):
 
             resume_file = resume_obj.resume if resume_obj else None
 
+            match_percentage = calculate_match_percentage(job, seeker)
+
             base = {
                 "label": f"Candidate #{idx}",
                 "user_id": seeker.id,
-                "match_percentage": 85,  # stub; you can compute a real score later
+                "match_percentage": match_percentage,  # stub; you can compute a real score later
                 "assignment_id": assignment.id if assignment else None,
                 "has_assignment": assignment is not None,
                 "completed": assignment.completed if assignment else False,
@@ -272,11 +274,23 @@ def employer_dashboard(request):
                 base["interview_sent"] = False
                 open_candidates.append(base)
 
+        open_candidates.sort(key=lambda c: c["match_percentage"], reverse=True)
+
+        top_candidates = open_candidates[:3]
+        remaining_candidates = open_candidates[3:]
+
+        high_match_count = sum(
+            1 for c in open_candidates if c["match_percentage"] >= 85
+        )
+
         job_data.append({
             "job": job,
-            "candidates": open_candidates,
+            "candidates": top_candidates,
+            "extra_candidates": remaining_candidates,
             "interviewed_candidates": interviewed_candidates,
+            "high_match_count": high_match_count,
         })
+
 
     return render(request, "JobFinder_app/employer_dashboard.html", {
         "job_data": job_data
@@ -552,7 +566,7 @@ def send_interview(request, job_id, seeker_id):
         receiver=seeker,
         subject=f"Interview for {job.title}",
         body=f"You have been invited to complete a video interview.\n\n"
-            f"Click here to begin:\n{interview_link}l",
+            f"Click here to begin:\n{interview_link}",
         job=job,
     )
 
@@ -1026,6 +1040,8 @@ def unread_count_api(request):
     ).count()
 
     return JsonResponse({"unread": count})
+
+
 
 
 # @login_required

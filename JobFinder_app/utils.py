@@ -147,6 +147,7 @@ def match_machinist_seekers(job):
             "manual_mill",
             "welding",
             "fabrication",
+            "minimum_hourly_pay",
         ]
         if getattr(req, field) and getattr(req, field) > 0
     }
@@ -166,3 +167,55 @@ def match_seekers_for_job(job):
     return User.objects.none()
 
 
+def calculate_match_percentage(job, seeker):
+    """
+    Returns a percentage (0–100) based on how many required fields
+    the seeker meets or exceeds.
+    """
+
+    total_requirements = 0
+    met_requirements = 0
+
+    if job.job_type == Job.SOFTWARE:
+        reqs = [
+            (job.req_one, SeekerModelOne),
+            (job.req_two, SeekerModelTwo),
+            (job.req_three, SeekerModelThree),
+        ]
+
+        for req, seeker_model in reqs:
+            seeker_exp = seeker_model.objects.filter(user=seeker).first()
+            if not req or not seeker_exp:
+                continue
+
+            for field in req._meta.fields:
+                if field.name in ("id", "job"):
+                    continue
+
+                required_val = getattr(req, field.name)
+                if required_val and required_val > 0:
+                    total_requirements += 1
+                    seeker_val = getattr(seeker_exp, field.name, 0) or 0
+                    if seeker_val >= required_val:
+                        met_requirements += 1
+
+    elif job.job_type == Job.MACHINIST:
+        req = job.machinist_requirements
+        seeker_exp = MachinistExperience.objects.filter(user=seeker).first()
+
+        if req and seeker_exp:
+            for field in req._meta.fields:
+                if field.name in ("id", "job"):
+                    continue
+
+                required_val = getattr(req, field.name)
+                if required_val and required_val > 0:
+                    total_requirements += 1
+                    seeker_val = getattr(seeker_exp, field.name, 0) or 0
+                    if seeker_val >= required_val:
+                        met_requirements += 1
+
+    if total_requirements == 0:
+        return 0
+
+    return round((met_requirements / total_requirements) * 100)

@@ -36,6 +36,7 @@ class SeekerModelOne(models.Model):
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
 
+    minimum_yearly_salary = models.IntegerField(null=True, blank=True, default=0)
     total_years_of_experience = models.IntegerField(default=0)
     html_experience = models.IntegerField(default=0)
     css_experience = models.IntegerField(default=0)
@@ -85,6 +86,7 @@ class MachinistExperience(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     years_experience = models.IntegerField(null=True, blank=True)
+    minimum_hourly_pay = models.IntegerField(null=True, blank=True)
 
     blueprint_reading = models.IntegerField(null=True, blank=True)
 
@@ -150,6 +152,7 @@ class JobRequirementOne(models.Model):
         on_delete=models.CASCADE,
         related_name="req_one"
     )
+    minimum_yearly_salary = models.IntegerField(null=True, blank=True, default=0)
     total_years_of_experience = models.IntegerField(default=0)
     html_experience = models.IntegerField(default=0)
     css_experience = models.IntegerField(default=0)
@@ -210,6 +213,8 @@ class MachinistJobRequirement(models.Model):
     )
 
     years_experience = models.IntegerField(null=True, blank=True)
+    minimum_hourly_pay = models.IntegerField(null=True, blank=True)
+
     blueprint_reading = models.IntegerField(null=True, blank=True)
 
     cnc_milling = models.IntegerField(null=True, blank=True)
