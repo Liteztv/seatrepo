@@ -26,7 +26,7 @@
 
             --ls-icon-color: #f1f3f5;
 
-            --chat-bg: #ffffff;
+            --chat-bg: #fffffff5;
             --chat-panel-bg: #f8f9fa;
             --chat-border: #dee2e6;
             --chat-text: #212529;
@@ -37,6 +37,7 @@
 
             --bubble-received-bg: #e9ecef;
             --bubble-received-text: #212529;
+            --account-settings: #9de3f4;
 
             /* BRAND COLOR */
             --ls-primary: #4dabf7;
@@ -230,7 +231,14 @@
             color: var(--ls-dark-muted);
         }
 
-        
+        .account_dropdown {
+            color: var(--account-settings);
+        }
+
+        body.dark-mode .account_dropdown {
+            background: var(--chat-bg);
+            color: var(--chat-text);
+        }
 
         /* ===========================
         ALERTS
@@ -562,8 +570,9 @@ document.addEventListener("DOMContentLoaded", function () {
             
             
         {% endif %}
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle p-0"
+        <li class="nav-item dropdown ">
+            <a class="nav-link dropdown-toggle p-0 account_dropdown"
+            style="color:var(--ls-dark-muted)"
             href="#"
             id="settingsDropdown"
             role="button"
@@ -574,7 +583,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 <i class="bi bi-gear-fill fs-5 text-white"></i>
             </a>
 
-            <ul class="dropdown-menu dropdown-menu-end shadow" style="background-color: #000; color: white;"
+            <ul class="dropdown-menu dropdown-menu-end shadow chat-messages"
                 aria-labelledby="settingsDropdown">
 
                 <li>
