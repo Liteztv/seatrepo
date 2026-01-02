@@ -198,7 +198,7 @@
                                             </span>
 
                                         {% elif seeker.can_view_resume %}
-                                            <a href="{% url 'view_resume' seeker.user_id %}"
+                                            <a href="{% url 'view_resume' item.job.id seeker.user_id %}"
                                             target="_blank"
                                             class="btn btn-sm btn-outline-info">
                                                 View Resume
@@ -218,19 +218,7 @@
                                         &nbsp;&nbsp;
 
 
-                                        {% if seeker.can_interview %}
-                                            <a href="{% url 'send_interview' item.job.id seeker.user_id %}"
-                                            class="btn btn-sm btn-outline-success">
-                                                Send Interview
-                                            </a>
-                                        {% else %}
-                                            <a href="{% url 'purchase_interview_access' item.job.id seeker.user_id %}"
-                                            class="btn btn-sm btn-warning">
-                                                Unlock Interview
-                                            </a>
-                                            
-
-                                        {% endif %}
+                                        
                                         
                                         {% if seeker.can_hire %}
                                             <a href="{% url 'hire_from_assignment' seeker.assignment_id %}"
