@@ -624,19 +624,22 @@ def answer_interview(request, assignment_id):
 
     if request.method == "POST":
         # clear any existing responses for re-tries, if you want
-        assignment.responses.all().delete()
+        # assignment.responses.all().delete()
 
         for idx, question in enumerate(questions):
-            file_key = f"video_{idx}"
-            video_file = request.FILES.get(file_key)
-            if video_file:
+            text_answer = request.POST.get(f"answer_{idx}", "").strip()
+            video_file = request.FILES.get(f"video_{idx}")
+
+            if text_answer or video_file:
                 InterviewResponse.objects.create(
                     assignment=assignment,
                     seeker=request.user,
                     question=question,
-                    video=video_file,
+                    text_answer=text_answer,
+                    video=video_file
                 )
 
+        
         assignment.completed = True
         assignment.save()
 
@@ -770,7 +773,7 @@ def conversation_view(request, convo_id):
 
 @login_required
 def review_interview(request, assignment_id):
-    assignment = get_object_or_404(InterviewAssignment, id=assignment_id)
+    assignment = get_object_or_404(InterviewAssignment, id=assignment_id,)
 
     # Security: only the employer who sent it can view
     if assignment.employer != request.user:

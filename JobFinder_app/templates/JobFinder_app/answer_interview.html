@@ -18,17 +18,17 @@
 
         {% for q in questions %}
             <div class="mb-4">
-                <label class="form-label"><strong>{{ q }}</strong></label>
-
+                <label class="form-label"><strong>{{ forloop.counter }}. {{ q }}</strong></label>
+                {% if not assignment.job.require_video_interview %}
                 <textarea
-                    name="text_{{ forloop.counter0 }}"
+                    name="answer_{{ forloop.counter0 }}"
                     class="form-control mb-2"
                     rows="4"
                     placeholder="Type your answer here..."
                     required
                 ></textarea>
-
-                {% if assignment.require_video %}
+                {% endif %}
+                {% if assignment.job.require_video_interview %}
                     <label class="form-label mt-2">Video Response (required)</label>
                     <input
                         type="file"

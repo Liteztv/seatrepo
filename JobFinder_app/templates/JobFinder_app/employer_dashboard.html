@@ -192,8 +192,12 @@
                                         <strong>{{ seeker.label }}</strong><br>
                                         <small class="dark-muted">Interview completed</small>
                                     </div>
+                                    <a href="{% url 'review_interview' seeker.assignment_id %}"
+                                        class="btn btn-sm btn-outline-primary">
+                                            Review Interview
+                                    </a>
                                         {% if not seeker.has_resume %}
-                                            <span class="text-muted fst-italic">
+                                            <span class="dark-muted fst-italic">
                                                 No resume available
                                             </span>
 

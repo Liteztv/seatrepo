@@ -274,7 +274,7 @@ class InterviewResponse(models.Model):
     )
     seeker = models.ForeignKey(User, on_delete=models.CASCADE)
     question = models.TextField()
-    test_answer = models.TextField(null=True, blank=True)
+    text_answer = models.TextField(null=True, blank=True)
     video = models.FileField(upload_to="interview_videos/", blank=True, null=True)
     submitted_at = models.DateTimeField(auto_now_add=True)
 
