@@ -755,6 +755,7 @@ def conversation_view(request, convo_id):
                     request,
                     "You must hire this candidate before sending messages."
                 )
+                
                 return redirect("conversation_view", convo_id=convo.id)
 
         msg = request.POST.get("message", "").strip()
@@ -780,6 +781,8 @@ def conversation_view(request, convo_id):
     conversations = Conversation.objects.filter(
         Q(user1=request.user) | Q(user2=request.user)
     ).distinct()
+
+    
 
     return render(request, "JobFinder_app/inbox_pro.html", {
         "conversations": conversations,

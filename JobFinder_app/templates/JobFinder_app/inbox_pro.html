@@ -103,7 +103,7 @@
             {% with other=convo|other_user:request.user %}
                 {{ other.username }}
             {% endwith %}
-                <a href="?c={{ convo.id }}" class="text-decoration-none text-reset">
+                <a href="{% url 'conversation_view' convo.id %}" class="text-decoration-none text-reset">
                     <div class="conversation-item {% if active_conversation and active_conversation.id == convo.id %}active{% endif %}">
                         <strong>{{ other.username }}</strong><br>
                         <small class="dark-muted">
