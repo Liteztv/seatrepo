@@ -16,7 +16,7 @@ from .forms import ( SeekerFormOne, SeekerFormTwo, SeekerFormThree, Registration
 from .models import ( SeekerModelOne, SeekerModelThree, SeekerModelTwo, Profile, 
                      Job, JobRequirementOne, JobRequirementTwo, JobRequirementThree,
                      InterviewAssignment, InterviewResponse, Message, Conversation, SeekerResume, EmployerAccess,
-                     MachinistExperience,
+                     MachinistExperience,Hire
                      )
 
 from django.db import transaction
@@ -662,33 +662,47 @@ def answer_interview(request, assignment_id):
 @login_required
 def hire_from_assignment(request, assignment_id):
     assignment = get_object_or_404(InterviewAssignment, id=assignment_id)
+    job = assignment.job
+    seeker = assignment.seeker
 
+    # Security check
     if assignment.employer != request.user:
+        messages.error(request, "You are not authorized to hire this candidate.")
         return redirect("employer_dashboard")
 
-    assignment.employer_marked_hire = True
-    assignment.save()
+    # Create hire record (if not already hired)
+    hire, created = Hire.objects.get_or_create(
+        job=job,
+        employer=request.user,
+        seeker=seeker,
+    )
 
-    # notify superusers so they can connect them
-    superusers = User.objects.filter(is_superuser=True)
-    for admin in superusers:
-        Message.objects.create(
-            sender=request.user,
-            receiver=admin,
-            subject="Candidate ready to hire",
-            body=(
-                f"Employer {request.user.username} wants to hire "
-                f"{assignment.seeker.username} for job '{assignment.job.title}'."
-            ),
-            job=assignment.job,
-        )
+    if not created:
+        messages.info(request, "You have already hired this candidate.")
+        return redirect("employer_dashboard")
 
-    assignment.superuser_notified = True
-    assignment.save()
+    # ✅ Unlock messaging by creating a conversation
+    Conversation.objects.get_or_create(
+        user1=request.user,
+        user2=seeker,
+        job=job,
+    )
 
-    messages.success(request, "Candidate marked for hire.")
+    # ✅ Send hire message
+    Message.objects.create(
+        sender=request.user,
+        receiver=seeker,
+        subject=f"Offer for {job.title}",
+        body=(
+            f"We would like to move forward and hire you for the "
+            f"{job.title} position.\n\n"
+            "You can reply here to discuss next steps."
+        ),
+        job=job,
+    )
+
+    messages.success(request, "Candidate hired and messaging unlocked.")
     return redirect("employer_dashboard")
-
 
 @login_required
 def inbox_pro(request):
@@ -726,15 +740,15 @@ def inbox_pro(request):
 def conversation_view(request, convo_id):
     convo = get_object_or_404(Conversation, id=convo_id)
 
-    # ✅ Must be a participant
+    # Must be a participant
     if request.user not in (convo.user1, convo.user2):
         return redirect("inbox_pro")
 
-    # ✅ Identify the OTHER user
+    # Identify the other user
     other_user = convo.user2 if request.user == convo.user1 else convo.user1
 
-    # ✅ BLOCK EMPLOYER FROM SENDING UNLESS HIRED / PAID
     if request.method == "POST":
+        # Block employer unless hired / paid
         if request.user.profile.role == "employer":
             if not has_hire_access(request.user, other_user, convo.job):
                 messages.error(
@@ -753,14 +767,16 @@ def conversation_view(request, convo_id):
                 job=convo.job,
             )
 
-    # ✅ Mark received messages as read (DO NOT gate this)
+        # ✅ PRG pattern — redirect after POST
+        return redirect("conversation_view", convo_id=convo.id)
+
+    # Mark received messages as read
     Message.objects.filter(
         conversation=convo,
         receiver=request.user,
         is_read=False
     ).update(is_read=True)
 
-    # ✅ Load conversations list
     conversations = Conversation.objects.filter(
         Q(user1=request.user) | Q(user2=request.user)
     ).distinct()
@@ -769,6 +785,7 @@ def conversation_view(request, convo_id):
         "conversations": conversations,
         "active_conversation": convo,
     })
+
 
 
 @login_required

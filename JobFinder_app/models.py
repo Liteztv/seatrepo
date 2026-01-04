@@ -352,3 +352,20 @@ class CreditTransaction(models.Model):
     def __str__(self):
         sign = "+" if self.amount >= 0 else ""
         return f"{sign}{self.amount} credits ({self.reason})"
+    
+class Hire(models.Model):
+    job = models.ForeignKey(Job, on_delete=models.CASCADE)
+    employer = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="hires_made"
+    )
+    seeker = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="hires_received"
+    )
+    hired_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("job", "employer", "seeker")
+
+    def __str__(self):
+        return f"{self.employer} hired {self.seeker} for {self.job}"
+
