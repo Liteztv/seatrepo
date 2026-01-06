@@ -219,3 +219,13 @@ def calculate_match_percentage(job, seeker):
         return 0
 
     return round((met_requirements / total_requirements) * 100)
+
+def filter_seekers_by_location(seekers, job):
+    if job.is_remote:
+        return seekers
+
+    job_zip = job.zip_code[:3]
+
+    return seekers.filter(
+        profile__zip_code__startswith=job_zip
+    )

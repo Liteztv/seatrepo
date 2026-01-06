@@ -22,6 +22,12 @@
 
             <p><strong>Username:</strong> {{ request.user.username }}</p>
             <p><strong>Email:</strong> {{ request.user.email }}</p>
+            <p><strong>Zip Code:</strong> {{ request.user.profile.zip_code }}</p>
+
+            
+            
+                
+            
 
             <a href="{% url 'seeker_form1' %}" class="btn btn-outline-primary">
                 <i class="bi bi-pencil"></i> Software Engineering Experience

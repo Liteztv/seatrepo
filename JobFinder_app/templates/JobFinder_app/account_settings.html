@@ -16,6 +16,9 @@
         <li class="list-group-item">
             <strong>Role:</strong> {{ request.user.profile.role|title }}
         </li>
+        <li class="list-group-item">
+            <strong>Zip Code:</strong> {{ request.user.profile.zip_code }}
+        </li>
     </ul>
 
     <a href="{% url 'change_email' %}" class="btn btn-outline-primary mb-2">
@@ -23,6 +26,9 @@
     </a>
     <a href="{% url 'change_password' %}" class="btn btn-outline-secondary mb-2">
         Change Password
+    </a>
+     <a href="{% url 'change_zipcode' %}" class="btn btn-outline-secondary mb-2">
+        Change Zip Code
     </a>
 
     <hr class="my-4">

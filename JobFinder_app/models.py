@@ -23,6 +23,13 @@ class Profile(models.Model):
         blank=True
     )
 
+    zip_code = models.CharField(
+        max_length=10,
+        blank=True,
+        null=True,
+        help_text="Used for job matching"
+    )
+    
     def __str__(self):
         return f"{self.user.username} – {self.role or 'No role'}"
 
@@ -121,6 +128,9 @@ class Job(models.Model):
     title = models.CharField(max_length=255)
     location = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True, default="No description provided.")
+    zip_code = models.CharField(max_length=10)
+    search_radius_miles = models.IntegerField(default=25)
+    is_remote = models.BooleanField(default=False)
     require_video_interview = models.BooleanField(
        default=False,
        help_text="Require candidates to submit video responses to interview questions" 

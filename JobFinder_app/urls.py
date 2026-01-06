@@ -113,6 +113,7 @@ urlpatterns = [
     path("settings/email/", views.change_email, name="change_email"),
     path("settings/password/", views.change_password, name="change_password"),
     path("settings/delete/", views.delete_account, name="delete_account"),
+    path("settings/zip_code/", views.change_zipcode, name="change_zipcode"),
 
     # -----------------------------
     # Seeker Experience Forms

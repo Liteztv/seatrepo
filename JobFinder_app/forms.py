@@ -15,6 +15,11 @@ from django.contrib.auth.forms import PasswordChangeForm
 class RegistrationForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput())
     role = forms.ChoiceField(choices=Profile.ROLE_CHOICES)
+    zip_code = forms.CharField(
+        max_length=10,
+        required=False,
+        
+    )
 
     class Meta:
         model = User
@@ -132,6 +137,18 @@ class EmailChangeForm(forms.ModelForm):
             raise forms.ValidationError("This email is already in use.")
         return email
 
+class ZipcodeChangeForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ["zip_code"]
+    def clean_zipcode(self):
+        zip_code = self.cleaned_data["zip_code"]
+        widgets = {
+            "zip_code": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Enter ZIP code"
+            })
+        }
 
 class ConfirmDeleteForm(forms.Form):
     confirm = forms.BooleanField(

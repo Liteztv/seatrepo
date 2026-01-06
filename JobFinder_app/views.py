@@ -10,7 +10,7 @@ from django.contrib.auth import authenticate, login, logout, update_session_auth
 from django.contrib.auth.forms import PasswordChangeForm
 from .forms import ( SeekerFormOne, SeekerFormTwo, SeekerFormThree, RegistrationForm, LoginForm,
                     JobForm, JobRequirementOneForm, JobRequirementTwoForm, JobRequirementThreeForm, ResumeUploadForm,
-                    EmailChangeForm, ConfirmDeleteForm, MachinistJobRequirementForm, MachinistExperienceForm
+                    EmailChangeForm, ConfirmDeleteForm, MachinistJobRequirementForm, MachinistExperienceForm, ZipcodeChangeForm
                     )
 # from django.urls import reverse
 from .models import ( SeekerModelOne, SeekerModelThree, SeekerModelTwo, Profile, 
@@ -20,7 +20,7 @@ from .models import ( SeekerModelOne, SeekerModelThree, SeekerModelTwo, Profile,
                      )
 
 from django.db import transaction
-from .utils import has_hire_access, has_interview_access, has_resume_access, match_seekers_for_job, calculate_match_percentage
+from .utils import has_hire_access, has_interview_access, has_resume_access, match_seekers_for_job, calculate_match_percentage, filter_seekers_by_location
 from django.conf import settings
 
 def get_or_create_conversation(user1, user2, job=None):
@@ -223,6 +223,8 @@ def employer_dashboard(request):
     job_data = []
     for job in jobs:
         seekers_qs = match_seekers_for_job(job)
+        seekers_qs = filter_seekers_by_location(seekers_qs, job)
+
 
         open_candidates = []
         interviewed_candidates = []
@@ -297,6 +299,10 @@ def employer_dashboard(request):
     })
 
 def seeker_dashboard(request):
+    profile = Profile.objects.filter(
+        zip_code=request.user
+    )
+
     assignments = InterviewAssignment.objects.filter(
         seeker=request.user
     ).order_by("-assigned_at")
@@ -309,6 +315,7 @@ def seeker_dashboard(request):
     return render(request, "JobFinder_app/seeker_dashboard.html", {
         "assignments": assignments,
         "messages": messages,
+        "profile": profile,
     })
 
 def home_view(request):
@@ -423,6 +430,9 @@ def register_view(request):
             role = form.cleaned_data["role"]
             profile, created = Profile.objects.get_or_create(user=user)
             profile.role = role
+            if profile.role == "seeker":
+                profile.zip_code = form.cleaned_data["zip_code"]
+
             profile.save()
 
             login(request, user)
@@ -887,6 +897,27 @@ def change_email(request):
         return redirect("account_settings")
 
     return render(request, "JobFinder_app/change_email.html", {"form": form})
+
+
+
+@login_required
+def change_zipcode(request):
+    profile = request.user.profile  # 👈 THIS IS CRITICAL
+
+    if request.method == "POST":
+        form = ZipcodeChangeForm(request.POST, instance=profile)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, "ZIP code updated successfully.")
+            return redirect("account_settings")
+
+    else:
+        form = ZipcodeChangeForm(instance=profile)
+
+    return render(request, "JobFinder_app/change_zipcode.html", {
+        "form": form
+    })
 
 
 @login_required

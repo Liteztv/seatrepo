@@ -25,5 +25,19 @@
         </div>
     </div>
 </div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const roleField = document.getElementById("id_role");
+    const zipField = document.getElementById("id_zip_code").closest(".mb-3");
+
+    function toggleZip() {
+        zipField.style.display = roleField.value === "seeker" ? "block" : "none";
+    }
+
+    roleField.addEventListener("change", toggleZip);
+    toggleZip();
+});
+</script>
+
 </body>
 </html>
