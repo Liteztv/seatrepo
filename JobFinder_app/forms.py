@@ -75,7 +75,7 @@ class MachinistExperienceForm(forms.ModelForm):
 class JobForm(forms.ModelForm):
     class Meta:
         model = Job
-        fields = ["title", "location", "description", "interview_questions", "require_video_interview"]
+        fields = ["title", "zip_code", "description", "interview_questions", "require_video_interview"]
         widgets = {
             "interview_questions": forms.Textarea(attrs={"rows": 5}),
         }
