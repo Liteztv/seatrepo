@@ -76,7 +76,7 @@ def has_hire_access(employer, seeker, job):
     ).exists()
 
 def match_software_seekers(job):
-    
+
     try:
         req1 = job.req_one
         req2 = job.req_two
@@ -88,7 +88,10 @@ def match_software_seekers(job):
     seekers2 = SeekerModelTwo.objects.all()
     seekers3 = SeekerModelThree.objects.all()
 
-    # Req1
+    # --------------------
+    # REQUIREMENT FILTERS
+    # --------------------
+
     filters_1 = {
         f"{field}__gte": getattr(req1, field)
         for field in ["total_years_of_experience", "html_experience", "css_experience"]
@@ -96,7 +99,6 @@ def match_software_seekers(job):
     }
     seekers1 = seekers1.filter(**filters_1)
 
-    # Req2
     fields2 = [
         "python_experience", "java_experience", "javascript_experience",
         "cplusplus_experience", "csharp_experience", "ruby_experience"
@@ -108,7 +110,6 @@ def match_software_seekers(job):
     }
     seekers2 = seekers2.filter(**filters_2)
 
-    # Req3
     fields3 = [
         f.name for f in req3._meta.fields
         if f.name not in ("id", "job")
@@ -120,13 +121,33 @@ def match_software_seekers(job):
     }
     seekers3 = seekers3.filter(**filters_3)
 
+    # --------------------
+    # INTERSECT SEEKERS
+    # --------------------
+
     ids = (
         set(seekers1.values_list("user_id", flat=True)) &
         set(seekers2.values_list("user_id", flat=True)) &
         set(seekers3.values_list("user_id", flat=True))
     )
 
-    return User.objects.filter(id__in=ids)
+    # ✅ BUILD USER QUERYSET FIRST (CRITICAL)
+    users = User.objects.filter(id__in=ids)
+
+    # --------------------
+    # ZIP CODE MATCHING
+    # --------------------
+
+    job_zip = job.zip_code.strip() if getattr(job, "zip_code", None) else None
+
+    # Match nearby areas using ZIP prefix (e.g. 191xx)
+    if job_zip and len(job_zip) >= 3:
+        zip_prefix = job_zip[:3]
+        users = users.filter(
+            profile__zip_code__startswith=zip_prefix
+        )
+
+    return users
 
 
 def match_machinist_seekers(job):
@@ -136,6 +157,10 @@ def match_machinist_seekers(job):
         return User.objects.none()
 
     qs = MachinistExperience.objects.all()
+
+    # --------------------
+    # REQUIREMENT FILTERS
+    # --------------------
 
     filters = {
         f"{field}__gte": getattr(req, field)
@@ -154,9 +179,25 @@ def match_machinist_seekers(job):
 
     qs = qs.filter(**filters)
 
-    return User.objects.filter(
+    # ✅ BUILD USER QUERYSET FIRST
+    users = User.objects.filter(
         id__in=qs.values_list("user_id", flat=True)
     )
+
+    # --------------------
+    # ZIP CODE MATCHING
+    # --------------------
+
+    job_zip = job.zip_code.strip() if getattr(job, "zip_code", None) else None
+
+    # Match nearby areas using ZIP prefix (e.g. 902xx)
+    if job_zip and len(job_zip) >= 3:
+        zip_prefix = job_zip[:3]
+        users = users.filter(
+            profile__zip_code__startswith=zip_prefix
+        )
+
+    return users
 
 
 def match_seekers_for_job(job):
