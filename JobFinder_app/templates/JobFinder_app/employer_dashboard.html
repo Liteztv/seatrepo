@@ -189,7 +189,10 @@
                             {% for seeker in item.interviewed_candidates %}
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     <div>
-                                        <strong>{{ seeker.label }}</strong><br>
+                                        <a href="{% url 'candidate_summary' item.job.id seeker.user_id %}"
+                                        class="text-decoration-none fw-bold text-primary">
+                                            {{ seeker.label }}
+                                        </a>
                                         <small class="dark-muted">Interview completed</small>
                                     </div>
                                     <a href="{% url 'review_interview' seeker.assignment_id %}"
