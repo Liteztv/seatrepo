@@ -130,7 +130,7 @@ class Job(models.Model):
     description = models.TextField(blank=True, default="No description provided.")
     zip_code = models.CharField(max_length=10)
     search_radius_miles = models.IntegerField(default=25)
-    is_remote = models.BooleanField(default=False)
+    remote_only = models.BooleanField(default=False)
     require_video_interview = models.BooleanField(
        default=False,
        help_text="Require candidates to submit video responses to interview questions" 

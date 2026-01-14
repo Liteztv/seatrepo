@@ -141,12 +141,17 @@ def match_software_seekers(job):
     job_zip = job.zip_code.strip() if getattr(job, "zip_code", None) else None
 
     # Match nearby areas using ZIP prefix (e.g. 191xx)
-    if job_zip and len(job_zip) >= 3:
-        zip_prefix = job_zip[:3]
-        users = users.filter(
-            profile__zip_code__startswith=zip_prefix
-        )
+    # if job_zip and len(job_zip) >= 3:
+    #     zip_prefix = job_zip[:3]
+    #     users = users.filter(
+    #         profile__zip_code__startswith=zip_prefix
+    #     )
 
+    if not job.remote_only and job.zipcode:
+        users = users.filter(
+            profile__zipcode__startswith=job.zipcode[:3]
+        )
+        
     return users
 
 
