@@ -147,9 +147,9 @@ def match_software_seekers(job):
     #         profile__zip_code__startswith=zip_prefix
     #     )
 
-    if not job.remote_only and job.zipcode:
+    if not job.remote_only and job.zip_code:
         users = users.filter(
-            profile__zipcode__startswith=job.zipcode[:3]
+            profile__zip_code__startswith=job.zip_code[:3]
         )
         
     return users
@@ -267,7 +267,7 @@ def calculate_match_percentage(job, seeker):
     return round((met_requirements / total_requirements) * 100)
 
 def filter_seekers_by_location(seekers, job):
-    if job.is_remote:
+    if job.remote_only:
         return seekers
 
     job_zip = job.zip_code[:3]

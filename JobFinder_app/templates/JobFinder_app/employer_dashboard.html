@@ -230,13 +230,13 @@
                                         {% if seeker.can_hire %}
                                             <a href="{% url 'hire_from_assignment' seeker.assignment_id %}"
                                             class="btn btn-sm btn-outline-primary">
-                                                Hire
+                                                Request live interview
                                             </a>
                                         
                                         {% else %}
                                             <a href="{% url 'purchase_hire_access' item.job.id seeker.user_id %}"
                                             class="btn btn-sm btn-danger">
-                                                Unlock Hire
+                                                Unlock live interview
                                             </a>
                                         {% endif %}
                                         

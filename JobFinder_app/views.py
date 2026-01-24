@@ -677,7 +677,7 @@ def hire_from_assignment(request, assignment_id):
 
     # Security check
     if assignment.employer != request.user:
-        messages.error(request, "You are not authorized to hire this candidate.")
+        messages.error(request, "You are not authorized to live interview this candidate.")
         return redirect("employer_dashboard")
 
     # Create hire record (if not already hired)
@@ -688,7 +688,7 @@ def hire_from_assignment(request, assignment_id):
     )
 
     if not created:
-        messages.info(request, "You have already hired this candidate.")
+        messages.info(request, "You have already live interviewed this candidate.")
         return redirect("employer_dashboard")
 
     # ✅ Unlock messaging by creating a conversation
@@ -702,16 +702,16 @@ def hire_from_assignment(request, assignment_id):
     Message.objects.create(
         sender=request.user,
         receiver=seeker,
-        subject=f"Offer for {job.title}",
+        subject=f"Live interview for {job.title}",
         body=(
-            f"We would like to move forward and hire you for the "
+            f"We would like to move forward and live interview you for the "
             f"{job.title} position.\n\n"
             "You can reply here to discuss next steps."
         ),
         job=job,
     )
 
-    messages.success(request, "Candidate hired and messaging unlocked.")
+    messages.success(request, "Candidate live interview and messaging unlocked.")
     return redirect("employer_dashboard")
 
 @login_required
