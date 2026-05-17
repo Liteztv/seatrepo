@@ -570,6 +570,8 @@ document.addEventListener("DOMContentLoaded", function () {
             
             
         {% endif %}
+
+        {% if user.is_authenticated %}
         <li class="nav-item dropdown ">
             <a class="nav-link dropdown-toggle p-0 account_dropdown"
             style="color:var(--ls-dark-muted)"
@@ -602,7 +604,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 </li>
             </ul>
         </li>
-        
+        {% endif %}
 
     </div>
 </nav>
